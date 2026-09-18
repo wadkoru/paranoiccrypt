@@ -2,7 +2,7 @@
   "name": "ParanoicCrypt",
   "short_name": "ParanoicCrypt",
   "lang": "uk",
-  "description": "Ховає файл у картинку",
+  "description": "Шифрує файл на пристрої і ховає його всередину картинки",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
