@@ -177,6 +177,8 @@
   #bgVideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3;
     opacity:.62;pointer-events:none;filter:saturate(.9) contrast(1.1)}
   @media (prefers-reduced-motion:reduce){ #bgVideo{display:none} }
+  #resultPic{display:block;width:100%;max-width:280px;margin:12px auto 0;border-radius:14px;
+    border:1px solid var(--line);-webkit-touch-callout:default}
   .share-row{display:flex;gap:8px;margin:8px 0 0}
   .share-row a{flex:1;text-align:center;padding:11px 4px;border-radius:13px;text-decoration:none;
     border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--dim);font-size:.88rem;font-weight:600}
@@ -325,6 +327,8 @@
         <button class="primary icon" id="btnSharePng" data-i18n-title="btnShare"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
       </div>
       <button class="ghost" id="btnDownloadRaw" data-i18n="saveRaw">Зберегти без картинки</button>
+      <img id="resultPic" class="hidden" alt="">
+      <p class="note hidden" id="picHold"></p>
       <p class="note hidden" id="saveHint"></p>
       <p class="alert" data-i18n-html="alertFile">📨 <span>Надсилай картинку <b>як файл</b>, не як фото — інакше все зникне.</span></p>
 
@@ -442,6 +446,7 @@ uk:{
  tabEnc:"Зашифрування", tabDec:"Розшифрування", btnEncrypt:"🔒 Зашифрувати", btnDecrypt:"🔓 Розшифрувати",
  badge:"Зроблено в Україні", offlineBtn:"⬇️ Скачати офлайн-версію",
  offlineDone:"✅ Збережено — працює без інтернету", offlineWait:"Готую файл…",
+ picHold:"Не вдається зберегти кнопкою? Натисни й потримай цю картинку — «Зберегти зображення».",
  saveHint:"Файл не зберігся або має дивне ім’я? Це вада вбудованих браузерів. Натисни кнопку зі стрілкою поруч і обери застосунок — або відкрий сторінку в Chrome.", tagline:"Ховає твій файл у картинку 🖼️",
  encStep1:"Вибери файл", tapHere:"Натисни тут", anyFile:"фото, відео, документ — будь-що",
  encStep2:"Захист", noteSimple:"Один ключ. Швидко й надійно.",
@@ -486,6 +491,7 @@ en:{
  tabEnc:"Encrypt", tabDec:"Decrypt", btnEncrypt:"🔒 Encrypt", btnDecrypt:"🔓 Decrypt",
  badge:"Made in Ukraine", offlineBtn:"⬇️ Download offline version",
  offlineDone:"✅ Saved — works without internet", offlineWait:"Preparing the file…",
+ picHold:"Button not working? Press and hold this picture — “Save image”.",
  saveHint:"File not saved or has a strange name? That is a flaw of built-in browsers. Tap the arrow button next to it and pick an app — or open the page in Chrome.", tagline:"Hides your file inside a picture 🖼️",
  encStep1:"Choose a file", tapHere:"Tap here", anyFile:"photo, video, document — anything",
  encStep2:"Protection", noteSimple:"One key. Fast and solid.",
@@ -1113,7 +1119,7 @@ async function readFromImage(file){
 
 /* ==================== ІНТЕРФЕЙС ==================== */
 let encFile=null, encOut=null, decBytes=null, decOut=null, busy=false;
-let selMin=0, variant=Math.floor(Math.random()*100), level=1;
+let selMin=0, variant=Math.floor(Math.random()*100), level=1, picUrl=null;
 let imgMode="meme", ownImg=null;
 
 function setBusy(v){
@@ -1124,9 +1130,16 @@ function setBusy(v){
 function progress(id,p){ $(id).classList.remove("hidden"); $(id).firstElementChild.style.width=Math.round(p*100)+"%"; }
 function msg(id,text,cls){ const el=$(id); el.textContent=text||""; el.className="msg"+(cls?" "+cls:""); }
 function download(blob,name){
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  /* деякі браузери (вбудований MIUI тощо) не знають атрибута download —
+     тоді відкриваємо файл у новій вкладці, звідки його можна зберегти вручну */
+  if("download" in HTMLAnchorElement.prototype) a.download=name; else a.target="_blank";
   document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  /* НЕ звільняємо одразу: якщо браузер показує діалог підтвердження,
+     користувач може натискати «OK» довше, ніж кілька секунд */
+  setTimeout(()=>URL.revokeObjectURL(url),300000);
 }
 function computeExpiry(){ return selMin ? Math.floor(Date.now()/1000)+selMin*60 : 0; }
 function fmtDeadline(unix){
@@ -1232,6 +1245,12 @@ $("btnEncrypt").onclick=async()=>{
       throw new UserError(t("badPic"));
     progress("encBar",1);
     encOut={png:blob,container,name:"meme-"+Math.random().toString(16).slice(2,10)+".png"};
+    if(picUrl) URL.revokeObjectURL(picUrl);
+    picUrl=URL.createObjectURL(blob);
+    $("resultPic").src=picUrl;
+    $("resultPic").classList.remove("hidden");
+    $("picHold").textContent=t("picHold");
+    $("picHold").classList.remove("hidden");
     $("keyOut").value=keyTextA;
     $("keyOut2").value=keyTextB||"";
     $("lblKey1").textContent = t(keyTextB?"resKey1n":"resKey1");
@@ -1443,9 +1462,7 @@ function dataUriToBlob(uri){
 }
 function dl(what,name,mime){
   const blob = what instanceof Blob ? what : new Blob([what],{type:mime||"text/plain"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  download(blob,name);
 }
 function homeDir(){
   return (isFileUrl && /^\/home\/[^/]+\//.test(location.pathname))
