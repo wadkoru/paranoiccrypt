@@ -307,6 +307,11 @@
         <button data-mode="meme" class="on" data-i18n="modeMeme">🎲 Готовий мем</button>
         <button data-mode="own" data-i18n="modeOwn">📷 Своя картинка</button>
       </div>
+      <div class="segmented" id="fmtPick">
+        <button data-fmt="jpeg" class="on" data-i18n="fmtPhoto">📷 Як фото</button>
+        <button data-fmt="png" data-i18n="fmtPixels">🖼️ У пікселях</button>
+      </div>
+      <p class="note" id="fmtNote"></p>
       <canvas id="preview" width="320" height="320"></canvas>
       <p class="vlabel" id="variantName"></p>
       <button class="ghost" id="btnDice" data-i18n="btnDice">🎲 Іншу картинку</button>
@@ -487,6 +492,9 @@ uk:{
  info3:"<span>🔑</span><span>Загубив ключ — файл не відкриє ніхто й ніколи.</span>",
  badPic:"Цей браузер зіпсував картинку. Натисни «Зберегти без картинки».",
  foundInside:"файл знайдено всередині",
+ fmtPhoto:"📷 Як фото", fmtPixels:"🖼️ У пікселях",
+ fmtNotePhoto:"JPEG, як знімок з телефона. Файл у рази менший. Дані дописані в кінець файлу.",
+ fmtNotePixels:"PNG, дані заховані в самих пікселях — непомітно навіть у редакторі, але файл важчий.",
  shareAsFile:"Кнопка зі стрілкою надсилає картинку як ФАЙЛ — саме так дані не пропадуть.",
  errRecompressed:"Це JPEG. Сховані дані бувають лише в PNG — цю картинку стиснув месенджер або галерея, і сховане знищено безповоротно. Попроси надіслати її ще раз як ФАЙЛ (документ), а не як фото.",
  errNoData:"У цьому файлі немає даних ParanoicCrypt. Потрібна картинка PNG, створена цією програмою, або файл .cbx.", noPic:"Не вдалося відкрити цю картинку. Спробуй іншу.", expired:"вичерпано"
@@ -535,6 +543,9 @@ en:{
  info3:"<span>🔑</span><span>Lose the key and nobody will ever open the file.</span>",
  badPic:"This browser damaged the picture. Press “Save without picture”.",
  foundInside:"file found inside",
+ fmtPhoto:"📷 As a photo", fmtPixels:"🖼️ In the pixels",
+ fmtNotePhoto:"JPEG, like a phone snapshot. Much smaller file. Data is appended at the end of the file.",
+ fmtNotePixels:"PNG, data hidden inside the pixels — invisible even in an editor, but the file is heavier.",
  shareAsFile:"The arrow button sends the picture as a FILE — that is how the data survives.",
  errRecompressed:"This is a JPEG. Hidden data lives only in PNG — this picture was recompressed by a messenger or gallery, so the hidden data is gone for good. Ask for it to be sent again as a FILE (document), not as a photo.",
  errNoData:"This file contains no ParanoicCrypt data. You need a PNG made by this app, or a .cbx file.", noPic:"Could not open this picture. Try another one.", expired:"expired"
@@ -1062,6 +1073,42 @@ async function embedIntoCanvas(cv,stego){
   if(!blob) throw new UserError("Браузер не зміг створити картинку.");
   return blob;
 }
+/* ===== Спосіб 2: контейнер дописується в кінець картинки =====
+   Файл лишається звичайним JPEG/PNG — відкривається в галереї як фото.
+   Формат хвоста: [дані][u32 довжина]["PCXJ"] — читається за сталий час з кінця.
+   Переживає будь-яке ПОБАЙТОВЕ пересилання (документом), але, як і піксельний
+   спосіб, не переживає перестискання месенджером. */
+const TAIL_MAGIC="PCXJ";
+function appendToBytes(imgBytes,container){
+  const out=new Uint8Array(imgBytes.length+container.length+8);
+  out.set(imgBytes,0);
+  out.set(container,imgBytes.length);
+  const dv=new DataView(out.buffer);
+  dv.setUint32(imgBytes.length+container.length, container.length);
+  out.set(te.encode(TAIL_MAGIC), imgBytes.length+container.length+4);
+  return out;
+}
+function readAppended(bytes){
+  if(!bytes||bytes.length<16) return null;
+  if(td.decode(bytes.slice(bytes.length-4))!==TAIL_MAGIC) return null;
+  const len=new DataView(bytes.buffer,bytes.byteOffset+bytes.length-8,4).getUint32(0);
+  if(len<=0||len>bytes.length-8) return null;
+  return bytes.slice(bytes.length-8-len, bytes.length-8);
+}
+async function hideAsPhoto(container,variant,ownFile){
+  let imgBytes;
+  if(ownFile){
+    imgBytes=new Uint8Array(await ownFile.arrayBuffer());   /* фото користувача — без змін */
+  }else{
+    const cv=makeMemeCanvas(1024,variant);
+    const jpg=await new Promise((r)=>cv.toBlob(r,"image/jpeg",0.82));
+    if(!jpg) throw new UserError("Браузер не зміг створити картинку.");
+    imgBytes=new Uint8Array(await jpg.arrayBuffer());
+  }
+  const bytes=appendToBytes(imgBytes,container);
+  const type=(ownFile&&ownFile.type)||"image/jpeg";
+  return {blob:new Blob([bytes],{type}), side:1024};
+}
 async function hideInMeme(container,variant){
   const stego=concat(te.encode(STEGO_MAGIC),u32(container.length),container);
   const side=sideForBytes(stego.length);
@@ -1103,6 +1150,13 @@ function withTimeout(promise,ms){
   return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))]);
 }
 async function readFromImage(file){
+  /* спершу дешева перевірка: дані могли бути дописані в кінець файлу */
+  const raw=new Uint8Array(await file.arrayBuffer());
+  const tail=readAppended(raw);
+  if(tail) return tail;
+  return readFromPixels(file);
+}
+async function readFromPixels(file){
   let bmp;
   try{
     if(typeof createImageBitmap==="function") bmp=await withTimeout(createImageBitmap(file),6000);
@@ -1126,7 +1180,7 @@ async function readFromImage(file){
 
 /* ==================== ІНТЕРФЕЙС ==================== */
 let encFile=null, encOut=null, decBytes=null, decOut=null, busy=false;
-let selMin=0, variant=Math.floor(Math.random()*100), level=1, picUrl=null;
+let selMin=0, variant=Math.floor(Math.random()*100), level=1, picUrl=null, fmt='jpeg', ownFile=null;
 let imgMode="meme", ownImg=null;
 
 function setBusy(v){
@@ -1218,12 +1272,19 @@ $("timePills").addEventListener("click",(e)=>{
 
 /* --- крок 3: картинка --- */
 $("btnDice").onclick=()=>{ variant=Math.floor(Math.random()*100); refreshPreview(); };
+$("fmtPick").addEventListener("click",(e)=>{
+  const b=e.target.closest("button[data-fmt]"); if(!b) return;
+  fmt=b.dataset.fmt==="png"?"png":"jpeg";
+  for(const el of $("fmtPick").children) el.classList.toggle("on",el===b);
+  $("fmtNote").textContent=t(fmt==="png"?"fmtNotePixels":"fmtNotePhoto");
+});
 $("imgMode").addEventListener("click",(e)=>{
   const b=e.target.closest("button[data-mode]"); if(b) setImgMode(b.dataset.mode);
 });
 $("ownFile").onchange=async(e)=>{
   const f=e.target.files[0]; if(!f) return;
   try{
+    ownFile=f;
     ownImg=await loadImageAny(f);
     imgMode="own"; refreshPreview();
     msg("encStatus","");
@@ -1240,18 +1301,20 @@ $("btnEncrypt").onclick=async()=>{
   try{
     const {container,keyTextA,keyTextB,expiry}=await encryptToContainer(encFile,computeExpiry(),level,(p)=>progress("encBar",p*0.7));
     msg("encStatus", t(imgMode==="own"&&ownImg?"stOwn":"stDraw"));
-    const {blob}= (imgMode==="own"&&ownImg)
-      ? await hideInOwnImage(container,ownImg)
-      : await hideInMeme(container,variant);
+    const own = imgMode==="own" ? ownFile : null;
+    const {blob}= fmt==="jpeg"
+      ? await hideAsPhoto(container,variant,own)
+      : (own ? await hideInOwnImage(container,ownImg) : await hideInMeme(container,variant));
     progress("encBar",0.9);
     msg("encStatus",t("stCheck"));
-    const back=await readFromImage(blob);
+    const back=await readFromImage(new File([blob],"check"+(blob.type==="image/png"?".png":".jpg"),{type:blob.type}));
     const a=new Uint8Array(await crypto.subtle.digest("SHA-256",container));
     const b=new Uint8Array(await crypto.subtle.digest("SHA-256",back));
     if(a.length!==b.length||a.some((x,i)=>x!==b[i]))
       throw new UserError(t("badPic"));
     progress("encBar",1);
-    encOut={png:blob,container,name:"meme-"+Math.random().toString(16).slice(2,10)+".png"};
+    const ext = blob.type==="image/png" ? ".png" : (blob.type==="image/webp" ? ".webp" : ".jpg");
+    encOut={png:blob,container,name:"IMG_"+Math.random().toString(16).slice(2,10).toUpperCase()+ext};
     if(picUrl) URL.revokeObjectURL(picUrl);
     picUrl=URL.createObjectURL(blob);
     $("resultPic").src=picUrl;
@@ -1347,10 +1410,16 @@ $("decFile").onchange=async(e)=>{
                    head[8]===0x57&&head[9]===0x45&&head[10]===0x42&&head[11]===0x50;
     const isCbx  = MAGIC.every((b,i)=>head[i]===b);
 
-    if(isJpeg||isWebp) throw new UserError(t("errRecompressed"));
-    if(isPng)      decBytes = await readFromImage(f);
-    else if(isCbx) decBytes = new Uint8Array(await f.arrayBuffer());
-    else           throw new UserError(t("errNoData"));
+    if(isCbx)      decBytes = new Uint8Array(await f.arrayBuffer());
+    else if(isPng) decBytes = await readFromImage(f);
+    else if(isJpeg||isWebp){
+      /* у JPEG дані можуть бути лише дописані в кінець: пікселі гине при стисненні */
+      const raw=new Uint8Array(await f.arrayBuffer());
+      const tail=readAppended(raw);
+      if(!tail) throw new UserError(t("errRecompressed"));
+      decBytes=tail;
+    }
+    else throw new UserError(t("errNoData"));
 
     /* не кажемо «знайдено», поки справді не переконались */
     const info=peekHeader(decBytes);
@@ -1638,6 +1707,7 @@ if(!isStandalone) $("btnInstall").classList.remove("hidden");
 
 function refreshDynamicLang(){
   if(!$("levelNote")) return;
+  $("fmtNote").textContent=t(fmt==="png"?"fmtNotePixels":"fmtNotePhoto");
   $("levelNote").textContent = t(level===2?"noteMedium":"noteSimple");
   $("timerLabel").textContent = t($("useTimer").checked?"timerOn":"timerOff");
   if(!$("encFile").files.length){ $("encDropTitle").textContent=t("tapHere"); $("encDropSub").textContent=t("anyFile"); }
