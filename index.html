@@ -32,10 +32,10 @@
       radial-gradient(38% 38% at 82% 18%, rgba(255,213,0,.24), transparent 62%),
       radial-gradient(45% 45% at 74% 78%, rgba(0,180,255,.38), transparent 62%),
       radial-gradient(40% 40% at 22% 84%, rgba(255,150,0,.18), transparent 62%);
-    filter:blur(30px); will-change:transform; transform:translateZ(0);
+    filter:blur(30px); opacity:.55; will-change:transform; transform:translateZ(0);
     animation:drift 30s ease-in-out infinite alternate;}
   .bg2{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
-    background:radial-gradient(120% 90% at 50% 0%, transparent 40%, rgba(7,11,20,.9) 100%);}
+    background:radial-gradient(120% 90% at 50% 0%, transparent 45%, rgba(7,11,20,.72) 100%);}
   @keyframes drift{
     0%{transform:translate3d(0,0,0) scale(1) rotate(0deg)}
     50%{transform:translate3d(-5%,4%,0) scale(1.12) rotate(4deg)}
@@ -46,6 +46,11 @@
   /* ---------- шапка ---------- */
   .ua-strip{position:fixed;top:0;left:0;right:0;height:5px;z-index:60;
     background:linear-gradient(#005BBB 0 50%,#FFD500 50% 100%)}
+  .offline-btn{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;
+    padding:10px 15px;border-radius:14px;cursor:pointer;font-size:.86rem;font-weight:700;
+    color:#cfe6ff;background:rgba(10,40,80,.75);border:1px solid rgba(120,180,255,.45);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .offline-btn:active{transform:scale(.97)}
   .ua-badge{display:inline-flex;align-items:center;gap:7px;font-size:.72rem;color:#ffe066;
     background:rgba(13,42,74,.75);border:1px solid #1d4f8a;border-radius:20px;padding:4px 11px}
   .ua-badge svg{flex:none;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
@@ -169,7 +174,7 @@
   .primary.icon{flex:0 0 58px;min-width:58px;padding:0;gap:0}
   .primary.icon svg{display:block}
   #bgVideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3;
-    opacity:.30;pointer-events:none;filter:saturate(.8)}
+    opacity:.62;pointer-events:none;filter:saturate(.9) contrast(1.1)}
   @media (prefers-reduced-motion:reduce){ #bgVideo{display:none} }
   .share-row{display:flex;gap:8px;margin:8px 0 0}
   .share-row a{flex:1;text-align:center;padding:11px 4px;border-radius:13px;text-decoration:none;
@@ -244,6 +249,7 @@
 <div id="fatalError" class="hidden"></div>
 
 <div class="wrap">
+  <div><button class="offline-btn" id="btnOffline" data-i18n="offlineBtn">⬇️ Скачати офлайн-версію</button></div>
   <div class="ua-badge">
     <svg width="20" height="13" viewBox="0 0 3 2" aria-hidden="true">
       <rect width="3" height="1" fill="#005BBB"/><rect y="1" width="3" height="1" fill="#FFD500"/>
@@ -410,7 +416,8 @@
 
 "use strict";
 /* JS працює -> попередження для режиму документа не потрібне */
-(function(){var w=document.getElementById("noJsWarn"); if(w) w.remove();})();
+var noJsBannerHTML="";
+(function(){var w=document.getElementById("noJsWarn"); if(w){ noJsBannerHTML=w.outerHTML; w.remove(); }})();
 
 
 /* ============ Формат контейнера (сумісний з прототипом) ============
@@ -431,7 +438,8 @@ const $=(id)=>document.getElementById(id);
 const T={
 uk:{
  tabEnc:"Зашифрування", tabDec:"Розшифрування", btnEncrypt:"🔒 Зашифрувати", btnDecrypt:"🔓 Розшифрувати",
- badge:"Зроблено в Україні", tagline:"Ховає твій файл у картинку 🖼️",
+ badge:"Зроблено в Україні", offlineBtn:"⬇️ Скачати офлайн-версію",
+ offlineDone:"✅ Збережено — працює без інтернету", offlineWait:"Готую файл…", tagline:"Ховає твій файл у картинку 🖼️",
  encStep1:"Вибери файл", tapHere:"Натисни тут", anyFile:"фото, відео, документ — будь-що",
  encStep2:"Захист", noteSimple:"Один ключ. Швидко й надійно.",
  noteMedium:"Два незалежні ключі: AES-256-GCM, а поверх нього ChaCha20-Poly1305. Потрібні ОБИДВА.",
@@ -473,7 +481,8 @@ uk:{
 },
 en:{
  tabEnc:"Encrypt", tabDec:"Decrypt", btnEncrypt:"🔒 Encrypt", btnDecrypt:"🔓 Decrypt",
- badge:"Made in Ukraine", tagline:"Hides your file inside a picture 🖼️",
+ badge:"Made in Ukraine", offlineBtn:"⬇️ Download offline version",
+ offlineDone:"✅ Saved — works without internet", offlineWait:"Preparing the file…", tagline:"Hides your file inside a picture 🖼️",
  encStep1:"Choose a file", tapHere:"Tap here", anyFile:"photo, video, document — anything",
  encStep2:"Protection", noteSimple:"One key. Fast and solid.",
  noteMedium:"Two independent keys: AES-256-GCM with ChaCha20-Poly1305 on top. BOTH are required.",
@@ -1584,6 +1593,33 @@ $("btnLang").onclick=()=>{
   try{ localStorage.setItem("pc_lang",lang); }catch{}
   applyLang();
 };
+
+/* Офлайн-копія: віддаємо рівно цей самий файл, тож формати гарантовано сумісні —
+   що зашифровано онлайн, відкриється офлайн, і навпаки. */
+$("btnOffline").onclick=async()=>{
+  const btn=$("btnOffline"), old=t("offlineBtn");
+  btn.disabled=true; btn.textContent=t("offlineWait");
+  let html=null;
+  try{
+    const r=await fetch(location.href.split("#")[0],{cache:"no-store"});
+    if(r.ok) html=await r.text();
+  }catch{}
+  if(!html){
+    html="<!doctype html>\n"+document.documentElement.outerHTML;
+    if(noJsBannerHTML) html=html.replace("<body>","<body>\n"+noJsBannerHTML);
+  }
+  download(new Blob([html],{type:"text/html;charset=utf-8"}),"Paranoic_crypt.html");
+  btn.textContent=t("offlineDone");
+  setTimeout(()=>{ btn.textContent=old; btn.disabled=false; },2800);
+};
+/* якщо браузер заблокував автозапуск — стартуємо після першого дотику */
+(function(){
+  const v=$("bgVideo"); if(!v) return;
+  const kick=()=>{ v.play().catch(()=>{}); };
+  v.play().catch(()=>{});
+  document.addEventListener("click",kick,{once:true});
+  document.addEventListener("touchstart",kick,{once:true});
+})();
 
 /* --- старт --- */
 applyLang();
