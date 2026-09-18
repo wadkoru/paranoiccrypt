@@ -461,7 +461,7 @@ uk:{
  resKey1:"② КЛЮЧ", resKey1n:"② КЛЮЧ 1", resKey2:"③ КЛЮЧ 2",
  btnSave:"⬇️ Зберегти", btnShare:"📤 Поділитися", btnCopy:"📋 Копіювати",
  needOne:"🔑 Для цього файлу потрібен один ключ", needBoth:"🔐 Подвійне шифрування — потрібні ОБИДВА ключі",
- foundKeys:"розпізнано ключів: {n} з {need}",
+ foundKeys:"вставлено ключів: {n}",
  copyKey:"📋 Копіювати ключ", copyKey1:"📋 Копіювати ключ 1", copyKey2:"📋 Копіювати ключ 2",
  shareKey:"📤 Поділитися ключем", shareKey1:"📤 Поділитися ключем 1", shareKey2:"📤 Поділитися ключем 2",
  copiedPaste:"✅ Скопійовано — встав у будь-який застосунок",
@@ -485,7 +485,9 @@ uk:{
  info2:"<span>🖼️</span><span>Картинка ховає файл від випадкового ока, але не від експерта.</span>",
  info3:"<span>🔑</span><span>Загубив ключ — файл не відкриє ніхто й ніколи.</span>",
  badPic:"Цей браузер зіпсував картинку. Натисни «Зберегти без картинки».",
- foundInside:"файл знайдено всередині", noPic:"Не вдалося відкрити цю картинку. Спробуй іншу.", expired:"вичерпано"
+ foundInside:"файл знайдено всередині",
+ errRecompressed:"Це JPEG. Сховані дані бувають лише в PNG — цю картинку стиснув месенджер або галерея, і сховане знищено безповоротно. Попроси надіслати її ще раз як ФАЙЛ (документ), а не як фото.",
+ errNoData:"У цьому файлі немає даних ParanoicCrypt. Потрібна картинка PNG, створена цією програмою, або файл .cbx.", noPic:"Не вдалося відкрити цю картинку. Спробуй іншу.", expired:"вичерпано"
 },
 en:{
  tabEnc:"Encrypt", tabDec:"Decrypt", btnEncrypt:"🔒 Encrypt", btnDecrypt:"🔓 Decrypt",
@@ -506,7 +508,7 @@ en:{
  resKey1:"② KEY", resKey1n:"② KEY 1", resKey2:"③ KEY 2",
  btnSave:"⬇️ Save", btnShare:"📤 Share", btnCopy:"📋 Copy",
  needOne:"🔑 This file needs one key", needBoth:"🔐 Double encryption — BOTH keys required",
- foundKeys:"keys recognised: {n} of {need}",
+ foundKeys:"keys pasted: {n}",
  copyKey:"📋 Copy key", copyKey1:"📋 Copy key 1", copyKey2:"📋 Copy key 2",
  shareKey:"📤 Share key", shareKey1:"📤 Share key 1", shareKey2:"📤 Share key 2",
  copiedPaste:"✅ Copied — paste it into any app",
@@ -530,7 +532,9 @@ en:{
  info2:"<span>🖼️</span><span>The picture hides the file from a casual eye, but not from an expert.</span>",
  info3:"<span>🔑</span><span>Lose the key and nobody will ever open the file.</span>",
  badPic:"This browser damaged the picture. Press “Save without picture”.",
- foundInside:"file found inside", noPic:"Could not open this picture. Try another one.", expired:"expired"
+ foundInside:"file found inside",
+ errRecompressed:"This is a JPEG. Hidden data lives only in PNG — this picture was recompressed by a messenger or gallery, so the hidden data is gone for good. Ask for it to be sent again as a FILE (document), not as a photo.",
+ errNoData:"This file contains no ParanoicCrypt data. You need a PNG made by this app, or a .cbx file.", noPic:"Could not open this picture. Try another one.", expired:"expired"
 }};
 let lang = (()=>{ try{ return localStorage.getItem("pc_lang") || ((navigator.language||"").toLowerCase().startsWith("uk")?"uk":"en"); }catch{ return "uk"; } })();
 function t(key,vars){
@@ -1325,14 +1329,27 @@ $("decFile").onchange=async(e)=>{
   if(!f){ $("keyNeed").textContent=""; setBusy(false); return; }
   msg("decStatus",t("stRead"));
   try{
-    const head=new Uint8Array(await f.slice(0,4).arrayBuffer());
-    decBytes = PNG_SIG.every((b,i)=>head[i]===b) ? await readFromImage(f) : new Uint8Array(await f.arrayBuffer());
+    const head=new Uint8Array(await f.slice(0,12).arrayBuffer());
+    const isPng  = PNG_SIG.every((b,i)=>head[i]===b);
+    const isJpeg = head[0]===0xFF && head[1]===0xD8;
+    const isWebp = head[0]===0x52&&head[1]===0x49&&head[2]===0x46&&head[3]===0x46&&
+                   head[8]===0x57&&head[9]===0x45&&head[10]===0x42&&head[11]===0x50;
+    const isCbx  = MAGIC.every((b,i)=>head[i]===b);
+
+    if(isJpeg||isWebp) throw new UserError(t("errRecompressed"));
+    if(isPng)      decBytes = await readFromImage(f);
+    else if(isCbx) decBytes = new Uint8Array(await f.arrayBuffer());
+    else           throw new UserError(t("errNoData"));
+
+    /* не кажемо «знайдено», поки справді не переконались */
+    const info=peekHeader(decBytes);
+    if(!info) throw new UserError(t("errNoData"));
+
     $("decDrop").classList.add("filled");
     $("decDropTitle").textContent="✅ "+f.name;
     $("decDropSub").textContent=t("foundInside");
     $("stepKey").classList.remove("locked");
-    const info=peekHeader(decBytes);
-    keysNeeded = (info && info.level===2) ? 2 : 1;
+    keysNeeded = info.level===2 ? 2 : 1;
     updateKeyNeed();
     if(info&&info.expiry){
       const left=info.expiry-Math.floor(Date.now()/1000);
@@ -1341,6 +1358,11 @@ $("decFile").onchange=async(e)=>{
     }
     msg("decStatus","");
   }catch(err){
+    decBytes=null; keysNeeded=1;
+    $("keyNeed").textContent="";
+    $("stepKey").classList.add("locked");
+    $("decDropTitle").textContent=t("tapHere");
+    $("decDropSub").textContent=t("picWithFile");
     $("decDrop").classList.remove("filled");
     msg("decStatus", err instanceof UserError?err.message:("Помилка: "+err.message), "err");
   }
