@@ -330,6 +330,7 @@
       <img id="resultPic" class="hidden" alt="">
       <p class="note hidden" id="picHold"></p>
       <p class="note hidden" id="saveHint"></p>
+      <p class="note" id="shareAsFile"></p>
       <p class="alert" data-i18n-html="alertFile">📨 <span>Надсилай картинку <b>як файл</b>, не як фото — інакше все зникне.</span></p>
 
       <p class="block-label" id="lblKey1" data-i18n="resKey1">② КЛЮЧ</p>
@@ -470,7 +471,7 @@ uk:{
  savedAttach:"✅ Збережено — прикріпи з теки Завантаження",
  saveRaw:"Зберегти без картинки",
  hintChannels:"<span>🔐</span><span>Надсилай ключі й картинку <b>різними</b> каналами. У Medium ключ 1 і ключ 2 теж варто розділити — тоді перехоплення одного каналу нічого не дає.</span>",
- alertFile:"📨 <span>Надсилай картинку <b>як файл</b>, не як фото — інакше все зникне.</span>",
+ alertFile:"📨 <span>Якщо надсилаєш вручну — обирай <b>Файл/Документ</b>, а не «Фото». Фото стискається, і сховане зникає.</span>",
  decStep1:"Вибери картинку", picWithFile:"картинка, у якій щось сховано",
  decStep2:"Встав ключ (або обидва)", keyPh:"Встав ключ. Якщо їх два — обидва сюди, у будь-якому порядку",
  btnPaste:"📋 Вставити ключ", decStep3:"Готово", saveOut:"⬇️ Зберегти файл", shareOut:"📤 Поділитися файлом",
@@ -486,6 +487,7 @@ uk:{
  info3:"<span>🔑</span><span>Загубив ключ — файл не відкриє ніхто й ніколи.</span>",
  badPic:"Цей браузер зіпсував картинку. Натисни «Зберегти без картинки».",
  foundInside:"файл знайдено всередині",
+ shareAsFile:"Кнопка зі стрілкою надсилає картинку як ФАЙЛ — саме так дані не пропадуть.",
  errRecompressed:"Це JPEG. Сховані дані бувають лише в PNG — цю картинку стиснув месенджер або галерея, і сховане знищено безповоротно. Попроси надіслати її ще раз як ФАЙЛ (документ), а не як фото.",
  errNoData:"У цьому файлі немає даних ParanoicCrypt. Потрібна картинка PNG, створена цією програмою, або файл .cbx.", noPic:"Не вдалося відкрити цю картинку. Спробуй іншу.", expired:"вичерпано"
 },
@@ -517,7 +519,7 @@ en:{
  savedAttach:"✅ Saved — attach it from your Downloads folder",
  saveRaw:"Save without picture",
  hintChannels:"<span>🔐</span><span>Send the keys and the picture through <b>different</b> channels. In Medium, split key 1 and key 2 too — then intercepting one channel gives nothing.</span>",
- alertFile:"📨 <span>Send the picture <b>as a file</b>, not as a photo — otherwise everything is lost.</span>",
+ alertFile:"📨 <span>If you attach it manually, pick <b>File/Document</b>, not “Photo”. Photos get compressed and the hidden data is lost.</span>",
  decStep1:"Choose a picture", picWithFile:"a picture with something hidden inside",
  decStep2:"Paste the key (or both)", keyPh:"Paste the key. If there are two — both here, in any order",
  btnPaste:"📋 Paste key", decStep3:"Done", saveOut:"⬇️ Save file", shareOut:"📤 Share file",
@@ -533,6 +535,7 @@ en:{
  info3:"<span>🔑</span><span>Lose the key and nobody will ever open the file.</span>",
  badPic:"This browser damaged the picture. Press “Save without picture”.",
  foundInside:"file found inside",
+ shareAsFile:"The arrow button sends the picture as a FILE — that is how the data survives.",
  errRecompressed:"This is a JPEG. Hidden data lives only in PNG — this picture was recompressed by a messenger or gallery, so the hidden data is gone for good. Ask for it to be sent again as a FILE (document), not as a photo.",
  errNoData:"This file contains no ParanoicCrypt data. You need a PNG made by this app, or a .cbx file.", noPic:"Could not open this picture. Try another one.", expired:"expired"
 }};
@@ -1260,6 +1263,7 @@ $("btnEncrypt").onclick=async()=>{
     $("lblKey1").textContent = t(keyTextB?"resKey1n":"resKey1");
     $("key2Block").classList.toggle("hidden", !keyTextB);
     $("expiryLine").textContent = expiry ? t("expUntil")+fmtDeadline(expiry) : t("expNone");
+    $("shareAsFile").textContent=t("shareAsFile");
     $("encResult").classList.remove("hidden");
     msg("encStatus",t("stDone")+fmtSize(blob.size),"ok");
     $("encResult").scrollIntoView({behavior:"smooth",block:"start"});
@@ -1293,7 +1297,14 @@ function shareOrCopy(text,title,btn){
 }
 /* ключ і картинка — завжди окремо, спільної кнопки немає навмисно */
 $("btnShareKey").onclick=()=>shareOrCopy($("keyOut").value,"ParanoicCrypt — ключ",$("btnShareKey"));
-$("btnSharePng").onclick=()=>{ if(encOut) shareFileOrSave(encOut.png,encOut.name,$("btnSharePng")); };
+$("btnSharePng").onclick=()=>{
+  if(!encOut) return;
+  /* Ключове: тип НЕ image/*. Інакше WhatsApp і Telegram вважають це фотографією
+     і стискають — а стиснення знищує сховані дані. З нейтральним типом
+     месенджер надсилає файл як документ, байт у байт. */
+  const asFile=new Blob([encOut.png],{type:"application/octet-stream"});
+  shareFileOrSave(asFile,encOut.name,$("btnSharePng"));
+};
 $("btnShareOut").onclick=()=>{ if(decOut) shareFileOrSave(decOut.blob,decOut.name,$("btnShareOut")); };
 function copyText(t,btn,okText){
   if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(t).catch(()=>{}); }
