@@ -1,0 +1,11 @@
+{
+  "name": "ParanoicCrypt",
+  "short_name": "ParanoicCrypt",
+  "lang": "uk",
+  "description": "Ховає файл у картинку",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#0a6cff"
+}
