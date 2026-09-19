@@ -421,6 +421,7 @@
 <div class="info-card hidden" id="infoCard">
   <p data-i18n-html="info1"><span>⏳</span><span>Таймер — це правило програми, а не магія. Хто має картинку і ключ, той може перевести годинник і відкрити пізніше.</span></p>
   <p data-i18n-html="info2"><span>🖼️</span><span>Картинка ховає файл від випадкового ока, але не від експерта.</span></p>
+  <button class="ghost" id="btnSelfTest" data-i18n="selfTest" style="margin:0 0 12px">🧪 Перевірити, що все працює</button>
   <p data-i18n-html="info3"><span>🔑</span><span>Загубив ключ — файл не відкриє ніхто й ніколи.</span></p>
 </div>
 
@@ -492,6 +493,8 @@ uk:{
  info3:"<span>🔑</span><span>Загубив ключ — файл не відкриє ніхто й ніколи.</span>",
  badPic:"Цей браузер зіпсував картинку. Натисни «Зберегти без картинки».",
  foundInside:"файл знайдено всередині",
+ selfTest:"🧪 Перевірити, що все працює", selfOk:"✅ Усе працює на цьому пристрої",
+ selfFail:"❌ Не спрацювало на цьому пристрої",
  fmtPhoto:"📷 Як фото", fmtPixels:"🖼️ У пікселях",
  fmtNotePhoto:"JPEG, як знімок з телефона. Файл у рази менший. Дані дописані в кінець файлу.",
  fmtNotePixels:"PNG, дані заховані в самих пікселях — непомітно навіть у редакторі, але файл важчий.",
@@ -543,6 +546,8 @@ en:{
  info3:"<span>🔑</span><span>Lose the key and nobody will ever open the file.</span>",
  badPic:"This browser damaged the picture. Press “Save without picture”.",
  foundInside:"file found inside",
+ selfTest:"🧪 Check that everything works", selfOk:"✅ Everything works on this device",
+ selfFail:"❌ Failed on this device",
  fmtPhoto:"📷 As a photo", fmtPixels:"🖼️ In the pixels",
  fmtNotePhoto:"JPEG, like a phone snapshot. Much smaller file. Data is appended at the end of the file.",
  fmtNotePixels:"PNG, data hidden inside the pixels — invisible even in an editor, but the file is heavier.",
@@ -1476,6 +1481,29 @@ $("btnDownloadOut").onclick=()=>{ if(decOut) download(decOut.blob,decOut.name); 
 
 /* --- ℹ️ --- */
 $("btnInfo").onclick=()=>$("infoCard").classList.toggle("hidden");
+
+/* Самоперевірка просто на пристрої користувача: повний цикл без мережі й без файлів.
+   Потрібна тому, що поведінка браузерів різна, і єдина надійна перевірка — на місці. */
+$("btnSelfTest").onclick=async()=>{
+  const btn=$("btnSelfTest");
+  btn.disabled=true; btn.textContent=t("stCheck");
+  try{
+    const payload=crypto.getRandomValues(new Uint8Array(20000));
+    const f=new File([payload],"self-test.bin",{type:"application/octet-stream"});
+    const steps=[];
+    const r=await encryptToContainer(f,0,2,()=>{});           steps.push("шифрування");
+    const {blob}=await hideAsPhoto(r.container,3,null);        steps.push("картинка");
+    const back=await readFromImage(new File([blob],"c.jpg",{type:"image/jpeg"}));
+    steps.push("читання");
+    const d=await decryptContainer(back, r.keyTextB+" "+r.keyTextA, ()=>{});
+    const outB=new Uint8Array(await d.blob.arrayBuffer());
+    const good = outB.length===payload.length && outB.every((v,i)=>v===payload[i]);
+    btn.textContent = good ? t("selfOk") : t("selfFail");
+  }catch(e){
+    btn.textContent = t("selfFail")+" ("+((e&&e.message)||"?").slice(0,40)+")";
+  }
+  setTimeout(()=>{ btn.disabled=false; btn.textContent=t("selfTest"); },6000);
+};
 
 /* ==================== ЯРЛИК НА ЕКРАН ==================== */
 /* Іконка застосунку: один вбудований майстер, решта розмірів малюється на льоту */
