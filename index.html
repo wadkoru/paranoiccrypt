@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ParanoicCrypt</title>
 <meta name="description" content="ParanoicCrypt: шифрує файл на вашому пристрої і ховає його всередину картинки. Нічого не надсилається в мережу.">
-<meta name="theme-color" content="#0a6cff">
+<meta name="theme-color" content="#00c853">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ParanoicCrypt">
 <style>
   :root{
-    --bg:#070b14; --card:rgba(16,23,38,.72); --line:rgba(255,255,255,.10);
-    --txt:#eef2f8; --dim:#9aa7bd; --blue:#0a6cff; --cyan:#00b4ff; --gold:#ffd500; --red:#ff6b6b; --green:#46d98a;
-    --r:20px;
+    --bg:#05070a; --card:rgba(10,18,15,.78); --line:rgba(0,255,140,.16);
+    --txt:#dcffea; --dim:#84a894; --blue:#00c853; --cyan:#39ff14; --gold:#ffd500; --red:#ff5f56; --green:#2ee6a6;
+    --mono:ui-monospace,"SF Mono","Cascadia Code","Fira Code","JetBrains Mono",Consolas,monospace;
+    --r:12px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
@@ -26,30 +27,25 @@
   }
   .wrap{max-width:560px;margin:0 auto}
 
-  /* ---------- анімований фон ---------- */
-  .bg{position:fixed;inset:-16%;z-index:-2;pointer-events:none;
+  /* ---------- фон: статична "термінальна" сітка й скан-лінії, без відео й без анімації —
+     нуль навантаження на GPU/CPU, малюється один раз і просто лежить шаром позаду ---------- */
+  .bg{position:fixed;inset:0;z-index:-2;pointer-events:none;
     background:
-      radial-gradient(42% 42% at 18% 22%, rgba(10,108,255,.55), transparent 62%),
-      radial-gradient(38% 38% at 82% 18%, rgba(255,213,0,.24), transparent 62%),
-      radial-gradient(45% 45% at 74% 78%, rgba(0,180,255,.38), transparent 62%),
-      radial-gradient(40% 40% at 22% 84%, rgba(255,150,0,.18), transparent 62%);
-    filter:blur(30px); opacity:.55; will-change:transform; transform:translateZ(0);
-    animation:drift 30s ease-in-out infinite alternate;}
-  .bg2{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
-    background:radial-gradient(120% 90% at 50% 0%, transparent 45%, rgba(7,11,20,.72) 100%);}
-  @keyframes drift{
-    0%{transform:translate3d(0,0,0) scale(1) rotate(0deg)}
-    50%{transform:translate3d(-5%,4%,0) scale(1.12) rotate(4deg)}
-    100%{transform:translate3d(4%,-4%,0) scale(1.05) rotate(-3deg)}
-  }
-  @media (prefers-reduced-motion:reduce){ .bg{animation:none} .pulse{animation:none!important} }
+      repeating-linear-gradient(0deg, rgba(0,255,140,.05) 0 1px, transparent 1px 3px),
+      linear-gradient(rgba(0,255,140,.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,140,.055) 1px, transparent 1px);
+    background-size:auto, 34px 34px, 34px 34px;
+    -webkit-mask-image:radial-gradient(85% 65% at 50% 10%, #000 40%, transparent 88%);
+            mask-image:radial-gradient(85% 65% at 50% 10%, #000 40%, transparent 88%);}
+  .bg2{position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 0%, transparent 40%, rgba(5,7,10,.85) 100%);}
 
   /* ---------- шапка ---------- */
   .ua-strip{position:fixed;top:0;left:0;right:0;height:5px;z-index:60;
     background:linear-gradient(#005BBB 0 50%,#FFD500 50% 100%)}
   .offline-btn{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;
     padding:10px 15px;border-radius:14px;cursor:pointer;font-size:.86rem;font-weight:700;
-    color:#cfe6ff;background:rgba(10,40,80,.75);border:1px solid rgba(120,180,255,.45);
+    color:#c8ffdf;background:rgba(6,28,18,.78);border:1px solid rgba(60,255,150,.45);
     -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
   .offline-btn:active{transform:scale(.97)}
   .p2p-link{display:inline-flex;align-items:center;gap:8px;margin:0 0 10px;
@@ -58,24 +54,28 @@
     -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
   .p2p-link:active{transform:scale(.97)}
   .ua-badge{display:inline-flex;align-items:center;gap:7px;font-size:.72rem;color:#ffe066;
-    background:rgba(13,42,74,.75);border:1px solid #1d4f8a;border-radius:20px;padding:4px 11px}
+    font-family:var(--mono);
+    background:rgba(9,16,13,.85);border:1px solid rgba(0,255,140,.3);border-radius:20px;padding:4px 11px}
   .ua-badge svg{flex:none;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
-  h1{font-size:1.7rem;margin:12px 0 2px;letter-spacing:-.5px;
-    background:linear-gradient(92deg,#fff,#8fc6ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h1{font-size:1.7rem;margin:12px 0 2px;letter-spacing:-.5px;font-family:var(--mono);
+    background:linear-gradient(92deg,#fff,#7dffb0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h1::after{content:"_";animation:blink 1.1s steps(1) infinite;color:var(--cyan);-webkit-text-fill-color:var(--cyan)}
+  @keyframes blink{50%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){ h1::after{animation:none} }
   .tagline{margin:0 0 18px;color:var(--dim);font-size:.95rem}
 
   /* ---------- вкладки ---------- */
   .tabs{display:flex;gap:10px;margin-bottom:18px}
   .tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
-    padding:14px 8px;border-radius:var(--r);border:1px solid var(--line);
-    background:rgba(16,23,38,.93);color:var(--dim);font-size:.95rem;font-weight:600;cursor:pointer;transition:.18s}
+    padding:14px 8px;border-radius:var(--r);border:1px solid var(--line);font-family:var(--mono);
+    background:rgba(9,16,13,.90);color:var(--dim);font-size:.95rem;font-weight:600;cursor:pointer;transition:.18s}
   .tabs button .ico{font-size:1.7rem;line-height:1}
-  .tabs button[aria-selected=true]{color:#fff;border-color:rgba(120,180,255,.6);
-    background:linear-gradient(160deg,rgba(10,108,255,.4),rgba(0,180,255,.18));
-    box-shadow:0 8px 28px rgba(10,108,255,.28)}
+  .tabs button[aria-selected=true]{color:#fff;border-color:rgba(60,255,150,.6);
+    background:linear-gradient(160deg,rgba(0,200,83,.4),rgba(57,255,20,.18));
+    box-shadow:0 8px 28px rgba(0,200,83,.28)}
 
   /* ---------- крок ---------- */
-  .step{background:rgba(16,23,38,.93);border:1px solid var(--line);border-radius:var(--r);
+  .step{background:rgba(9,16,13,.90);border:1px solid var(--line);border-radius:var(--r);
     padding:16px;margin-bottom:14px;transition:.25s}
   .step.locked{opacity:.34;pointer-events:none;filter:grayscale(.5)}
   .step-head{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;margin-bottom:12px}
@@ -106,14 +106,15 @@
   button{font-family:inherit}
   .primary{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
     min-height:60px;margin-top:6px;border:0;border-radius:16px;cursor:pointer;
-    font-size:1.15rem;font-weight:800;color:#fff;
+    font-size:1.15rem;font-weight:800;color:#06140c;font-family:var(--mono);
     background:linear-gradient(135deg,var(--blue),var(--cyan));
-    box-shadow:0 10px 30px rgba(10,108,255,.35);transition:.15s}
+    box-shadow:0 10px 30px rgba(0,200,83,.35);transition:.15s}
   .primary:active{transform:scale(.98)}
   .primary:disabled{opacity:.35;box-shadow:none;cursor:default}
   .primary.gold{background:linear-gradient(135deg,var(--gold),#ffab00);color:#06101f;box-shadow:0 10px 30px rgba(255,200,0,.3)}
   .primary.pulse{animation:pulse 2.2s ease-in-out infinite}
-  @keyframes pulse{0%,100%{box-shadow:0 10px 30px rgba(10,108,255,.35)}50%{box-shadow:0 10px 42px rgba(0,180,255,.6)}}
+  @keyframes pulse{0%,100%{box-shadow:0 10px 30px rgba(0,200,83,.35)}50%{box-shadow:0 10px 42px rgba(57,255,20,.55)}}
+  @media (prefers-reduced-motion:reduce){ .pulse{animation:none!important} }
   .ghost{width:100%;min-height:48px;margin-top:9px;border-radius:14px;cursor:pointer;
     border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--dim);font-size:.95rem;font-weight:600}
 
@@ -140,12 +141,12 @@
   .segmented{display:flex;gap:8px;margin-bottom:12px}
   .segmented button{flex:1;padding:12px 6px;border-radius:13px;border:1px solid var(--line);
     background:rgba(255,255,255,.05);color:var(--dim);font-size:.92rem;font-weight:700;cursor:pointer;transition:.15s}
-  .segmented button.on{background:linear-gradient(150deg,rgba(10,108,255,.55),rgba(0,180,255,.3));
-    color:#fff;border-color:rgba(120,180,255,.6)}
+  .segmented button.on{background:linear-gradient(150deg,rgba(0,200,83,.55),rgba(57,255,20,.3));
+    color:#fff;border-color:rgba(60,255,150,.6)}
   .install-card{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:80;
     max-width:536px;margin:0 auto;padding:16px;border-radius:22px;
     background:linear-gradient(165deg,rgba(14,32,62,.98),rgba(9,14,26,.98));
-    border:1px solid rgba(120,180,255,.35);box-shadow:0 22px 60px rgba(0,0,0,.65);
+    border:1px solid rgba(60,255,150,.35);box-shadow:0 22px 60px rgba(0,0,0,.65);
     animation:rise .35s cubic-bezier(.2,.9,.3,1.2)}
   @keyframes rise{from{transform:translateY(120%);opacity:0}to{transform:none;opacity:1}}
   .install-top{display:flex;gap:13px;align-items:center;margin-bottom:12px}
@@ -166,7 +167,7 @@
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .modal{position:relative;width:100%;max-width:392px;padding:24px 20px 20px;border-radius:26px;text-align:center;
     background:linear-gradient(168deg,rgba(18,38,72,.99),rgba(9,14,26,.99));
-    border:1px solid rgba(120,180,255,.34);box-shadow:0 30px 80px rgba(0,0,0,.7);
+    border:1px solid rgba(60,255,150,.34);box-shadow:0 30px 80px rgba(0,0,0,.7);
     animation:pop .3s cubic-bezier(.2,.9,.3,1.25)}
   @keyframes pop{from{transform:scale(.88);opacity:0}to{transform:none;opacity:1}}
   .modal img{width:76px;height:76px;border-radius:19px;box-shadow:0 10px 26px rgba(0,0,0,.5)}
@@ -179,15 +180,12 @@
   .act-row .primary{flex:1;margin-top:6px}
   .primary.icon{flex:0 0 58px;min-width:58px;padding:0;gap:0}
   .primary.icon svg{display:block}
-  #bgVideo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3;
-    opacity:.62;pointer-events:none;filter:saturate(.9) contrast(1.1)}
-  @media (prefers-reduced-motion:reduce){ #bgVideo{display:none} }
   #resultPic{display:block;width:100%;max-width:280px;margin:12px auto 0;border-radius:14px;
     border:1px solid var(--line);-webkit-touch-callout:default}
   .share-row{display:flex;gap:8px;margin:8px 0 0}
   .share-row a{flex:1;text-align:center;padding:11px 4px;border-radius:13px;text-decoration:none;
     border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--dim);font-size:.88rem;font-weight:600}
-  .hint{margin:12px 0 0;font-size:.85rem;color:#8fc6ff;display:flex;gap:8px;align-items:flex-start}
+  .hint{margin:12px 0 0;font-size:.85rem;color:#7dffb0;display:flex;gap:8px;align-items:flex-start}
   .block-label{margin:16px 0 6px;font-size:.85rem;color:var(--dim);font-weight:700;letter-spacing:.3px}
   .switch{display:flex;align-items:center;gap:11px;cursor:pointer;padding:2px 0;user-select:none}
   .switch input{position:absolute;opacity:0;width:0;height:0}
@@ -204,8 +202,8 @@
     color:#eee;font-size:.88rem;font-weight:600;cursor:pointer;transition:.15s}
   .os-grid button:active{transform:scale(.96)}
   .os-grid button i{font-style:normal;font-size:1.8rem;line-height:1}
-  .os-grid button.me{border-color:rgba(120,180,255,.7);background:linear-gradient(160deg,rgba(10,108,255,.35),rgba(0,180,255,.14))}
-  .os-grid button.me::after{content:"схоже, у тебе";font-size:.64rem;color:#8fc6ff}
+  .os-grid button.me{border-color:rgba(60,255,150,.7);background:linear-gradient(160deg,rgba(0,200,83,.35),rgba(57,255,20,.14))}
+  .os-grid button.me::after{content:"схоже, у тебе";font-size:.64rem;color:#7dffb0}
   .os-grid button:last-child{grid-column:span 2}
   #osActions button{width:100%;margin:0 0 8px}
   #osPane .steps{text-align:left}
@@ -226,7 +224,7 @@
     color:var(--txt);font-size:1.4rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
   .info-card{position:fixed;left:16px;right:16px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:69;
     max-width:528px;margin:0 auto;padding:16px;border-radius:var(--r);
-    background:rgba(10,16,28,.96);border:1px solid var(--line);font-size:.88rem;color:var(--dim);
+    background:rgba(7,14,11,.96);border:1px solid var(--line);font-size:.88rem;color:var(--dim);
     box-shadow:0 20px 50px rgba(0,0,0,.6)}
   .info-card p{margin:0 0 10px;display:flex;gap:9px}
   .info-card p:last-child{margin:0}
@@ -251,7 +249,6 @@
   <p><b>Computer / Android:</b> open this file in Chrome, Safari or Firefox.</p>
 </div>
 
-<video id="bgVideo" autoplay muted loop playsinline preload="auto" src="bg.mp4"></video>
 <div class="bg"></div><div class="bg2"></div>
 <div class="ua-strip"></div>
 <div id="fatalError" class="hidden"></div>
@@ -1775,7 +1772,7 @@ const typeOf=(u)=>u.slice(5,u.indexOf(";"));
       const mf={name:"ParanoicCrypt",short_name:"ParanoicCrypt",lang:"uk",
         description:"Ховає файл у картинку",
         start_url:location.href,scope:"./",display:"standalone",
-        background_color:"#070b14",theme_color:"#0a6cff",
+        background_color:"#05070a",theme_color:"#00c853",
         icons:[{src:i192,sizes:"192x192",type:typeOf(i192)},
                {src:i512,sizes:"512x512",type:typeOf(i512)},
                {src:i512m,sizes:"512x512",type:typeOf(i512m),purpose:"maskable"}]};
@@ -1961,7 +1958,8 @@ $("btnLang").onclick=()=>{
 };
 
 /* Офлайн-копія: віддаємо рівно цей самий файл, тож формати гарантовано сумісні —
-   що зашифровано онлайн, відкриється офлайн, і навпаки. */
+   що зашифровано онлайн, відкриється офлайн, і навпаки. Без відеофону сторінка й так
+   лише один невеликий файл — окремо вбудовувати більше нічого не треба. */
 async function buildOfflineHtml(){
   let html=null;
   try{
@@ -1971,19 +1969,6 @@ async function buildOfflineHtml(){
   if(!html){
     html="<!doctype html>\n"+document.documentElement.outerHTML;
     if(noJsBannerHTML) html=html.replace("<body>","<body>\n"+noJsBannerHTML);
-  }
-  /* на сайті відео лежить окремим файлом — вбудовуємо, щоб копія була самодостатньою */
-  const m=html.match(/<video id="bgVideo"[^>]*src="([^"]+)"/);
-  if(m && m[1].indexOf("data:")!==0){
-    try{
-      const vr=await fetch(new URL(m[1],location.href),{cache:"no-store"});
-      if(vr.ok){
-        const buf=new Uint8Array(await vr.arrayBuffer());
-        let bin=""; const CH=0x8000;
-        for(let i=0;i<buf.length;i+=CH) bin+=String.fromCharCode.apply(null,buf.subarray(i,i+CH));
-        html=html.replace('src="'+m[1]+'"','src="data:video/mp4;base64,'+btoa(bin)+'"');
-      }
-    }catch{}
   }
   return html;
 }
@@ -1995,14 +1980,6 @@ $("btnOffline").onclick=async()=>{
   btn.textContent=t("offlineDone");
   setTimeout(()=>{ btn.textContent=old; btn.disabled=false; },2800);
 };
-/* якщо браузер заблокував автозапуск — стартуємо після першого дотику */
-(function(){
-  const v=$("bgVideo"); if(!v) return;
-  const kick=()=>{ v.play().catch(()=>{}); };
-  v.play().catch(()=>{});
-  document.addEventListener("click",kick,{once:true});
-  document.addEventListener("touchstart",kick,{once:true});
-})();
 
 /* --- старт --- */
 applyLang();
