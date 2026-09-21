@@ -52,6 +52,11 @@
     color:#cfe6ff;background:rgba(10,40,80,.75);border:1px solid rgba(120,180,255,.45);
     -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
   .offline-btn:active{transform:scale(.97)}
+  .p2p-link{display:inline-flex;align-items:center;gap:8px;margin:0 0 10px;
+    padding:10px 15px;border-radius:14px;font-size:.86rem;font-weight:700;text-decoration:none;
+    color:#d8ffe4;background:rgba(10,70,45,.75);border:1px solid rgba(110,220,160,.45);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .p2p-link:active{transform:scale(.97)}
   .ua-badge{display:inline-flex;align-items:center;gap:7px;font-size:.72rem;color:#ffe066;
     background:rgba(13,42,74,.75);border:1px solid #1d4f8a;border-radius:20px;padding:4px 11px}
   .ua-badge svg{flex:none;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
@@ -253,6 +258,7 @@
 
 <div class="wrap">
   <div><button class="offline-btn" id="btnOffline" data-i18n="offlineBtn">⬇️ Скачати офлайн-версію</button></div>
+  <div><a class="p2p-link" id="linkP2p" href="https://wadkoru.github.io/paranoiccrypt-p2p/" target="_blank" rel="noopener" data-i18n="p2pLink">💬 Приватний P2P-чат і дзвінки</a></div>
   <div class="ua-badge">
     <svg width="20" height="13" viewBox="0 0 3 2" aria-hidden="true">
       <rect width="3" height="1" fill="#005BBB"/><rect y="1" width="3" height="1" fill="#FFD500"/>
@@ -460,6 +466,7 @@ const T={
 uk:{
  tabEnc:"Зашифрування", tabDec:"Розшифрування", btnEncrypt:"🔒 Зашифрувати", btnDecrypt:"🔓 Розшифрувати",
  badge:"Зроблено в Україні", offlineBtn:"⬇️ Скачати офлайн-версію",
+ p2pLink:"💬 Приватний P2P-чат і дзвінки",
  offlineDone:"✅ Збережено — працює без інтернету", offlineWait:"Готую файл…",
  picHold:"Не вдається зберегти кнопкою? Натисни й потримай цю картинку — «Зберегти зображення».",
  saveHint:"Файл не зберігся або має дивне ім’я? Це вада вбудованих браузерів. Натисни кнопку зі стрілкою поруч і обери застосунок — або відкрий сторінку в Chrome.", tagline:"Ховає твій файл у картинку 🖼️",
@@ -516,6 +523,7 @@ uk:{
 en:{
  tabEnc:"Encrypt", tabDec:"Decrypt", btnEncrypt:"🔒 Encrypt", btnDecrypt:"🔓 Decrypt",
  badge:"Made in Ukraine", offlineBtn:"⬇️ Download offline version",
+ p2pLink:"💬 Private P2P chat & calls",
  offlineDone:"✅ Saved — works without internet", offlineWait:"Preparing the file…",
  picHold:"Button not working? Press and hold this picture — “Save image”.",
  saveHint:"File not saved or has a strange name? That is a flaw of built-in browsers. Tap the arrow button next to it and pick an app — or open the page in Chrome.", tagline:"Hides your file inside a picture 🖼️",
