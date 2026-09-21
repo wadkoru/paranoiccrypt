@@ -302,7 +302,13 @@
     </div>
 
     <div class="step locked" id="stepMeme">
-      <div class="step-head"><i>3</i><span data-i18n="encStep3">Обери картинку</span></div>
+      <div class="step-head"><i>3</i><span data-i18n="encStep3">Як виглядатиме файл</span></div>
+      <div class="segmented" id="kindPick">
+        <button data-kind="pdf" class="on" data-i18n="kindPdf">📄 Документ PDF</button>
+        <button data-kind="pic" data-i18n="kindPic">🖼️ Картинка</button>
+      </div>
+      <p class="note" id="kindNote"></p>
+      <div id="picBlock" class="hidden">
       <div class="segmented" id="imgMode">
         <button data-mode="meme" class="on" data-i18n="modeMeme">🎲 Готовий мем</button>
         <button data-mode="own" data-i18n="modeOwn">📷 Своя картинка</button>
@@ -317,6 +323,7 @@
       <button class="ghost" id="btnDice" data-i18n="btnDice">🎲 Іншу картинку</button>
       <label class="ghost" id="btnOwnPick" for="ownFile" style="display:none" data-i18n="btnOwnPick">📷 Вибрати свою картинку</label>
       <input type="file" id="ownFile" accept="image/*">
+      </div>
     </div>
 
     <button class="primary" id="btnEncrypt" data-i18n="btnEncrypt" disabled>🔒 Зашифрувати</button>
@@ -326,7 +333,8 @@
     <div class="step result hidden" id="encResult">
       <div class="step-head"><i>✓</i><span data-i18n="resDone">Готово — збережи обидва!</span></div>
 
-      <p class="block-label" data-i18n="resPic">① КАРТИНКА З ФАЙЛОМ</p>
+      <p class="block-label" id="resLabel">① ДОКУМЕНТ</p>
+      <p class="note" id="resFileName" style="margin:0 0 4px;word-break:break-all"></p>
       <div class="act-row">
         <button class="primary" id="btnDownloadPng" data-i18n="btnSave">⬇️ Зберегти</button>
         <button class="primary icon" id="btnSharePng" data-i18n-title="btnShare"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
@@ -369,7 +377,7 @@
         <b id="decDropTitle" data-i18n="tapHere">Натисни тут</b>
         <span id="decDropSub" data-i18n="picWithFile">картинка, у якій щось сховано</span>
       </label>
-      <input type="file" id="decFile">
+      <input type="file" id="decFile" accept="application/pdf,image/*,.pdf,.cbx">
       <p class="deadline hidden" id="decDeadline"></p>
     </div>
 
@@ -460,7 +468,7 @@ uk:{
  noteMedium:"Два незалежні ключі: AES-256-GCM, а поверх нього ChaCha20-Poly1305. Потрібні ОБИДВА.",
  timerOff:"Без обмежень — відкривати можна завжди", timerOn:"Після цього часу файл більше не відкриється",
  h15:"15 хв", h30:"30 хв", h1:"1 год", h3:"3 год", h6:"6 год", h12:"12 год",
- encStep3:"Обери картинку", modeMeme:"🎲 Готовий мем", modeOwn:"📷 Своя картинка",
+ encStep3:"Як виглядатиме файл", modeMeme:"🎲 Готовий мем", modeOwn:"📷 Своя картинка",
  btnDice:"🎲 Іншу картинку", btnOwnPick:"📷 Вибрати свою картинку",
  picN:"картинка № {n} зі 100", picOwn:"твоя картинка", picHint:"будь-яке фото з телефона", picTap:"натисни кнопку нижче",
  encStep4:"Збережи обидва!", key1:"🔑 КЛЮЧ", key1n:"🔑 КЛЮЧ 1", key2:"🔑 КЛЮЧ 2",
@@ -478,7 +486,7 @@ uk:{
  saveRaw:"Зберегти без картинки",
  hintChannels:"<span>🔐</span><span>Надсилай ключі й картинку <b>різними</b> каналами. У Medium ключ 1 і ключ 2 теж варто розділити — тоді перехоплення одного каналу нічого не дає.</span>",
  alertFile:"📨 <span>Якщо надсилаєш вручну — обирай <b>Файл/Документ</b>, а не «Фото». Фото стискається, і сховане зникає.</span>",
- decStep1:"Вибери картинку", picWithFile:"картинка, у якій щось сховано",
+ decStep1:"Вибери файл", picWithFile:"документ PDF або картинка з прихованим",
  decStep2:"Встав ключ (або обидва)", keyPh:"Встав ключ. Якщо їх два — обидва сюди, у будь-якому порядку",
  btnPaste:"📋 Вставити ключ", decStep3:"Готово", saveOut:"⬇️ Зберегти файл", shareOut:"📤 Поділитися файлом",
  stEnc:"Шифрую файл…", stDraw:"Малюю картинку…", stOwn:"Ховаю у твою картинку…", stCheck:"Перевіряю…",
@@ -493,6 +501,9 @@ uk:{
  info3:"<span>🔑</span><span>Загубив ключ — файл не відкриє ніхто й ніколи.</span>",
  badPic:"Цей браузер зіпсував картинку. Натисни «Зберегти без картинки».",
  foundInside:"файл знайдено всередині",
+ kindPdf:"📄 Документ PDF", kindPic:"🖼️ Картинка", resDoc:"① ДОКУМЕНТ",
+ kindNotePdf:"Найнадійніше. Виглядає як звичайний скан документа, месенджери ніколи не стискають PDF — файл дійде цілим.",
+ kindNotePic:"Файл ховається в картинку. Надсилай лише як ФАЙЛ/документ: фото месенджери стискають, і сховане гине.",
  selfTest:"🧪 Перевірити, що все працює", selfOk:"✅ Усе працює на цьому пристрої",
  selfFail:"❌ Не спрацювало на цьому пристрої",
  fmtPhoto:"📷 Як фото", fmtPixels:"🖼️ У пікселях",
@@ -513,7 +524,7 @@ en:{
  noteMedium:"Two independent keys: AES-256-GCM with ChaCha20-Poly1305 on top. BOTH are required.",
  timerOff:"No limit — can be opened any time", timerOn:"After this time the file will no longer open",
  h15:"15 min", h30:"30 min", h1:"1 hour", h3:"3 hours", h6:"6 hours", h12:"12 hours",
- encStep3:"Choose a picture", modeMeme:"🎲 Ready meme", modeOwn:"📷 Your picture",
+ encStep3:"What the file looks like", modeMeme:"🎲 Ready meme", modeOwn:"📷 Your picture",
  btnDice:"🎲 Another picture", btnOwnPick:"📷 Pick your picture",
  picN:"picture {n} of 100", picOwn:"your picture", picHint:"any photo from your phone", picTap:"tap the button below",
  encStep4:"Save both!", key1:"🔑 KEY", key1n:"🔑 KEY 1", key2:"🔑 KEY 2",
@@ -531,7 +542,7 @@ en:{
  saveRaw:"Save without picture",
  hintChannels:"<span>🔐</span><span>Send the keys and the picture through <b>different</b> channels. In Medium, split key 1 and key 2 too — then intercepting one channel gives nothing.</span>",
  alertFile:"📨 <span>If you attach it manually, pick <b>File/Document</b>, not “Photo”. Photos get compressed and the hidden data is lost.</span>",
- decStep1:"Choose a picture", picWithFile:"a picture with something hidden inside",
+ decStep1:"Choose the file", picWithFile:"a PDF document or a picture with hidden data",
  decStep2:"Paste the key (or both)", keyPh:"Paste the key. If there are two — both here, in any order",
  btnPaste:"📋 Paste key", decStep3:"Done", saveOut:"⬇️ Save file", shareOut:"📤 Share file",
  stEnc:"Encrypting…", stDraw:"Drawing the picture…", stOwn:"Hiding in your picture…", stCheck:"Verifying…",
@@ -546,6 +557,9 @@ en:{
  info3:"<span>🔑</span><span>Lose the key and nobody will ever open the file.</span>",
  badPic:"This browser damaged the picture. Press “Save without picture”.",
  foundInside:"file found inside",
+ kindPdf:"📄 PDF document", kindPic:"🖼️ Picture", resDoc:"① DOCUMENT",
+ kindNotePdf:"Most reliable. Looks like an ordinary scanned document; messengers never compress PDFs, so the file arrives intact.",
+ kindNotePic:"The file hides inside a picture. Send only as a FILE/document: messengers compress photos and destroy hidden data.",
  selfTest:"🧪 Check that everything works", selfOk:"✅ Everything works on this device",
  selfFail:"❌ Failed on this device",
  fmtPhoto:"📷 As a photo", fmtPixels:"🖼️ In the pixels",
@@ -1078,6 +1092,75 @@ async function embedIntoCanvas(cv,stego){
   if(!blob) throw new UserError("Браузер не зміг створити картинку.");
   return blob;
 }
+/* ===== Спосіб 3 (за замовчуванням): документ PDF =====
+   Справжній PDF на одну сторінку A4, схожий на блідий скан. Дані — окремий обʼєкт,
+   на який сторінка не посилається: переглядачі його не показують, а файл лишається
+   повністю коректним (перевірено poppler/pdfinfo). Месенджери PDF не стискають ніколи —
+   тому цей спосіб найнадійніший для пересилання. */
+function buildScanPdf(container,seed){
+  const parts=[], offsets=[]; let pos=0;
+  const push=(u8)=>{ parts.push(u8); pos+=u8.length; };
+  const str=(x)=>push(te.encode(x));
+  str("%PDF-1.4\n");
+  push(new Uint8Array([0x25,0xE2,0xE3,0xCF,0xD3,0x0A]));
+  const rnd=mulberry32(seed>>>0);
+  let c="0.975 g 0 0 595 842 re f\n0.86 G 0.5 w 42 42 511 758 re S\n0.80 g\n";
+  let y=770;
+  while(y>90){
+    const w=(0.45+rnd()*0.5)*460;
+    c+="60 "+y.toFixed(1)+" "+w.toFixed(1)+" 5.2 re f\n";
+    y-=13+rnd()*4;
+    if(rnd()<0.12) y-=14;
+  }
+  const cb=te.encode(c);
+  const obj=(k,body)=>{ offsets[k]=pos; str(k+" 0 obj\n"+body+"\nendobj\n"); };
+  obj(1,"<< /Type /Catalog /Pages 2 0 R >>");
+  obj(2,"<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+  obj(3,"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << >> >>");
+  offsets[4]=pos; str("4 0 obj\n<< /Length "+cb.length+" >>\nstream\n"); push(cb); str("\nendstream\nendobj\n");
+  const payload=new Uint8Array(12+container.length);
+  payload.set(te.encode("PCXDATA1"),0);
+  new DataView(payload.buffer).setUint32(8,container.length);
+  payload.set(container,12);
+  offsets[5]=pos; str("5 0 obj\n<< /Length "+payload.length+" >>\nstream\n"); push(payload); str("\nendstream\nendobj\n");
+  const xrefPos=pos;
+  let x="xref\n0 6\n0000000000 65535 f \n";
+  for(let k=1;k<=5;k++) x+=String(offsets[k]).padStart(10,"0")+" 00000 n \n";
+  str(x);
+  str("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n"+xrefPos+"\n%%EOF\n");
+  const out=new Uint8Array(pos); let o=0;
+  for(const q of parts){ out.set(q,o); o+=q.length; }
+  return out;
+}
+function readFromPdf(bytes){
+  const m=[0x50,0x43,0x58,0x44,0x41,0x54,0x41,0x31];   /* "PCXDATA1" */
+  outer: for(let i=0;i<=bytes.length-12;i++){
+    for(let k=0;k<8;k++) if(bytes[i+k]!==m[k]) continue outer;
+    const len=new DataView(bytes.buffer,bytes.byteOffset+i+8,4).getUint32(0);
+    if(len<=0||i+12+len>bytes.length) return null;
+    return bytes.slice(i+12,i+12+len);
+  }
+  return null;
+}
+/* імена як у застосунків-сканерів; час злегка зміщено, щоб не збігався з моментом шифрування */
+function scanName(){
+  const d=new Date(Date.now()-Math.floor(Math.random()*95)*60000);
+  const p=(v)=>String(v).padStart(2,"0");
+  const Y=d.getFullYear(), M=p(d.getMonth()+1), D=p(d.getDate()), h=p(d.getHours()), mi=p(d.getMinutes()), se=p(d.getSeconds());
+  const mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()];
+  const pool=[
+    "Scan_"+Y+"-"+M+"-"+D+"_"+h+"-"+mi+".pdf",
+    "CamScanner "+D+"-"+M+"-"+Y+" "+h+"."+mi+".pdf",
+    "Scan "+Y+M+D+" "+h+mi+se+".pdf",
+    "Scanned_Document_"+Y+M+D+".pdf",
+    "scan_"+D+M+Y+"_"+h+mi+".pdf",
+    "Скан_"+D+"."+M+"."+Y+"_"+h+"-"+mi+".pdf",
+    "Adobe Scan "+D+" "+mon+" "+Y+".pdf",
+    "Document_"+Y+"-"+M+"-"+D+".pdf"
+  ];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
 /* ===== Спосіб 2: контейнер дописується в кінець картинки =====
    Файл лишається звичайним JPEG/PNG — відкривається в галереї як фото.
    Формат хвоста: [дані][u32 довжина]["PCXJ"] — читається за сталий час з кінця.
@@ -1185,7 +1268,7 @@ async function readFromPixels(file){
 
 /* ==================== ІНТЕРФЕЙС ==================== */
 let encFile=null, encOut=null, decBytes=null, decOut=null, busy=false;
-let selMin=0, variant=Math.floor(Math.random()*100), level=1, picUrl=null, fmt='jpeg', ownFile=null;
+let selMin=0, variant=Math.floor(Math.random()*100), level=1, picUrl=null, fmt='jpeg', ownFile=null, kind='pdf';
 let imgMode="meme", ownImg=null;
 
 function setBusy(v){
@@ -1277,11 +1360,23 @@ $("timePills").addEventListener("click",(e)=>{
 
 /* --- крок 3: картинка --- */
 $("btnDice").onclick=()=>{ variant=Math.floor(Math.random()*100); refreshPreview(); };
+function applyKind(){
+  $("picBlock").classList.toggle("hidden", kind!=="pic");
+  $("kindNote").textContent=t(kind==="pdf"?"kindNotePdf":"kindNotePic");
+  if(kind==="pic") refreshPreview();
+}
+$("kindPick").addEventListener("click",(e)=>{
+  const b=e.target.closest("button[data-kind]"); if(!b) return;
+  kind=b.dataset.kind==="pic"?"pic":"pdf";
+  for(const el of $("kindPick").children) el.classList.toggle("on",el===b);
+  applyKind();
+});
 $("fmtPick").addEventListener("click",(e)=>{
   const b=e.target.closest("button[data-fmt]"); if(!b) return;
   fmt=b.dataset.fmt==="png"?"png":"jpeg";
   for(const el of $("fmtPick").children) el.classList.toggle("on",el===b);
   $("fmtNote").textContent=t(fmt==="png"?"fmtNotePixels":"fmtNotePhoto");
+  $("kindNote").textContent=t(kind==="pdf"?"kindNotePdf":"kindNotePic");
 });
 $("imgMode").addEventListener("click",(e)=>{
   const b=e.target.closest("button[data-mode]"); if(b) setImgMode(b.dataset.mode);
@@ -1307,25 +1402,36 @@ $("btnEncrypt").onclick=async()=>{
     const {container,keyTextA,keyTextB,expiry}=await encryptToContainer(encFile,computeExpiry(),level,(p)=>progress("encBar",p*0.7));
     msg("encStatus", t(imgMode==="own"&&ownImg?"stOwn":"stDraw"));
     const own = imgMode==="own" ? ownFile : null;
-    const {blob}= fmt==="jpeg"
-      ? await hideAsPhoto(container,variant,own)
-      : (own ? await hideInOwnImage(container,ownImg) : await hideInMeme(container,variant));
+    let blob, outName;
+    if(kind==="pdf"){
+      blob=new Blob([buildScanPdf(container, crypto.getRandomValues(new Uint32Array(1))[0])],{type:"application/pdf"});
+      outName=scanName();
+    }else{
+      ({blob} = fmt==="jpeg"
+        ? await hideAsPhoto(container,variant,own)
+        : (own ? await hideInOwnImage(container,ownImg) : await hideInMeme(container,variant)));
+    }
     progress("encBar",0.9);
     msg("encStatus",t("stCheck"));
-    const back=await readFromImage(new File([blob],"check"+(blob.type==="image/png"?".png":".jpg"),{type:blob.type}));
+    const back = kind==="pdf"
+      ? readFromPdf(new Uint8Array(await blob.arrayBuffer()))
+      : await readFromImage(new File([blob],"check"+(blob.type==="image/png"?".png":".jpg"),{type:blob.type}));
     const a=new Uint8Array(await crypto.subtle.digest("SHA-256",container));
     const b=new Uint8Array(await crypto.subtle.digest("SHA-256",back));
     if(a.length!==b.length||a.some((x,i)=>x!==b[i]))
       throw new UserError(t("badPic"));
     progress("encBar",1);
     const ext = blob.type==="image/png" ? ".png" : (blob.type==="image/webp" ? ".webp" : ".jpg");
-    encOut={png:blob,container,name:"IMG_"+Math.random().toString(16).slice(2,10).toUpperCase()+ext};
+    encOut={png:blob,container,name: outName || ("IMG_"+Math.random().toString(16).slice(2,10).toUpperCase()+ext)};
     if(picUrl) URL.revokeObjectURL(picUrl);
     picUrl=URL.createObjectURL(blob);
     $("resultPic").src=picUrl;
-    $("resultPic").classList.remove("hidden");
+    const isPic = kind==="pic";
+    $("resultPic").classList.toggle("hidden",!isPic);
     $("picHold").textContent=t("picHold");
-    $("picHold").classList.remove("hidden");
+    $("picHold").classList.toggle("hidden",!isPic);
+    $("resLabel").textContent=t(isPic?"resPic":"resDoc");
+    $("resFileName").textContent="📎 "+encOut.name;
     $("keyOut").value=keyTextA;
     $("keyOut2").value=keyTextB||"";
     $("lblKey1").textContent = t(keyTextB?"resKey1n":"resKey1");
@@ -1370,7 +1476,11 @@ $("btnSharePng").onclick=()=>{
   /* Ключове: тип НЕ image/*. Інакше WhatsApp і Telegram вважають це фотографією
      і стискають — а стиснення знищує сховані дані. З нейтральним типом
      месенджер надсилає файл як документ, байт у байт. */
-  const asFile=new Blob([encOut.png],{type:"application/octet-stream"});
+  /* PDF месенджери не стискають ніколи — лишаємо рідний тип, файл показується як документ.
+     Картинку ж маскуємо під нейтральний тип, інакше її надішлють як фото. */
+  const asFile = encOut.png.type==="application/pdf"
+    ? encOut.png
+    : new Blob([encOut.png],{type:"application/octet-stream"});
   shareFileOrSave(asFile,encOut.name,$("btnSharePng"));
 };
 $("btnShareOut").onclick=()=>{ if(decOut) shareFileOrSave(decOut.blob,decOut.name,$("btnShareOut")); };
@@ -1414,8 +1524,13 @@ $("decFile").onchange=async(e)=>{
     const isWebp = head[0]===0x52&&head[1]===0x49&&head[2]===0x46&&head[3]===0x46&&
                    head[8]===0x57&&head[9]===0x45&&head[10]===0x42&&head[11]===0x50;
     const isCbx  = MAGIC.every((b,i)=>head[i]===b);
+    const isPdf  = head[0]===0x25&&head[1]===0x50&&head[2]===0x44&&head[3]===0x46;   /* %PDF */
 
     if(isCbx)      decBytes = new Uint8Array(await f.arrayBuffer());
+    else if(isPdf){
+      decBytes = readFromPdf(new Uint8Array(await f.arrayBuffer()));
+      if(!decBytes) throw new UserError(t("errNoData"));
+    }
     else if(isPng) decBytes = await readFromImage(f);
     else if(isJpeg||isWebp){
       /* у JPEG дані можуть бути лише дописані в кінець: пікселі гине при стисненні */
@@ -1492,8 +1607,13 @@ $("btnSelfTest").onclick=async()=>{
     const f=new File([payload],"self-test.bin",{type:"application/octet-stream"});
     const steps=[];
     const r=await encryptToContainer(f,0,2,()=>{});           steps.push("шифрування");
+    /* перевіряємо обидва носії: документ PDF і картинку */
+    const pdfBytes=buildScanPdf(r.container,777);               steps.push("pdf");
+    const fromPdf=readFromPdf(pdfBytes);
     const {blob}=await hideAsPhoto(r.container,3,null);        steps.push("картинка");
-    const back=await readFromImage(new File([blob],"c.jpg",{type:"image/jpeg"}));
+    const fromPic=await readFromImage(new File([blob],"c.jpg",{type:"image/jpeg"}));
+    if(!fromPdf || fromPdf.length!==r.container.length || fromPdf.some((v,i)=>v!==r.container[i])) throw new Error("PDF");
+    const back=fromPic;
     steps.push("читання");
     const d=await decryptContainer(back, r.keyTextB+" "+r.keyTextA, ()=>{});
     const outB=new Uint8Array(await d.blob.arrayBuffer());
@@ -1797,6 +1917,7 @@ $("btnOffline").onclick=async()=>{
 
 /* --- старт --- */
 applyLang();
+applyKind();
 if(navigator.clipboard?.readText) $("btnPaste").classList.remove("hidden");
 requestAnimationFrame(()=>setTimeout(refreshPreview,0));   /* не тримаємо перший кадр */
 </script>
