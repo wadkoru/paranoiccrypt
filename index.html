@@ -1098,40 +1098,121 @@ async function embedIntoCanvas(cv,stego){
    повністю коректним (перевірено poppler/pdfinfo). Месенджери PDF не стискають ніколи —
    тому цей спосіб найнадійніший для пересилання. */
 function buildScanPdf(container,seed){
-  const parts=[], offsets=[]; let pos=0;
-  const push=(u8)=>{ parts.push(u8); pos+=u8.length; };
-  const str=(x)=>push(te.encode(x));
-  str("%PDF-1.4\n");
-  push(new Uint8Array([0x25,0xE2,0xE3,0xCF,0xD3,0x0A]));
   const rnd=mulberry32(seed>>>0);
-  let c="0.975 g 0 0 595 842 re f\n0.86 G 0.5 w 42 42 511 758 re S\n0.80 g\n";
-  let y=770;
-  while(y>90){
-    const w=(0.45+rnd()*0.5)*460;
-    c+="60 "+y.toFixed(1)+" "+w.toFixed(1)+" 5.2 re f\n";
-    y-=13+rnd()*4;
-    if(rnd()<0.12) y-=14;
+  const ri=(a,b)=>a+Math.floor(rnd()*(b-a+1));
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+
+  /* ---- кодування: Helvetica + Differences, покриває латиницю, цифри, пунктуацію та укр. кирилицю ---- */
+  const cu="АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ",   nu=[17,18,19,20,50,21,22,53,24,25,26,55,56,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,46,48,49];
+  const cl="абвгґдеєжзиіїйклмнопрстуфхцчшщьюя",     nl=[65,66,67,68,98,69,70,101,72,73,74,103,104,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,94,96,97];
+  const CYR={}; for(let i=0;i<cu.length;i++)CYR[cu[i]]="afii"+(10000+nu[i]); for(let i=0;i<cl.length;i++)CYR[cl[i]]="afii"+(10000+nl[i]);
+  const HWA={" ":278,"!":278,'"':355,"#":556,"%":889,"&":667,"'":191,"(":333,")":333,"*":389,"+":584,",":278,"-":333,".":278,"/":278,":":278,";":278,"=":584,"?":556,"@":1015,"_":556};
+  const HWU={A:667,B:667,C:722,D:722,E:667,F:611,G:778,H:722,I:278,J:500,K:667,L:556,M:833,N:722,O:778,P:667,Q:778,R:722,S:667,T:611,U:722,V:667,W:944,X:667,Y:667,Z:611};
+  const HWL={a:556,b:556,c:500,d:556,e:556,f:278,g:556,h:556,i:222,j:222,k:500,l:222,m:833,n:556,o:556,p:556,q:556,r:333,s:500,t:278,u:556,v:500,w:722,x:500,y:500,z:500};
+  const CUW={"І":278,"Ї":278,"М":833,"Ш":778,"Щ":833,"Ю":778,"Ж":722,"Ф":722};
+  const CLW={"і":278,"ї":278,"м":833,"ш":722,"щ":778,"ю":722,"ж":667,"ф":600,"ь":500};
+  const widthOf=ch=>{ if(ch==="№")return 950; if(HWA[ch]!=null)return HWA[ch]; if(ch>="0"&&ch<="9")return 556; if(HWU[ch]!=null)return HWU[ch]; if(HWL[ch]!=null)return HWL[ch]; if(cu.indexOf(ch)>=0)return CUW[ch]||667; if(cl.indexOf(ch)>=0)return CLW[ch]||556; return 500; };
+  const DIG=["zero","one","two","three","four","five","six","seven","eight","nine"];
+  const PUN={" ":"space",".":"period",",":"comma",":":"colon",";":"semicolon","-":"hyphen","(":"parenleft",")":"parenright","/":"slash","%":"percent","+":"plus","=":"equal","'":"quotesingle",'"':"quotedbl","*":"asterisk","&":"ampersand","!":"exclam","?":"question","_":"underscore","@":"at","№":"afii61352"};
+  const gname=ch=>{ if(CYR[ch])return CYR[ch]; if((ch>="A"&&ch<="Z")||(ch>="a"&&ch<="z"))return ch; if(ch>="0"&&ch<="9")return DIG[ch.charCodeAt(0)-48]; if(PUN[ch])return PUN[ch]; return "space"; };
+  const codeOf={}, diffNames=[], diffW=[];
+  const enc=s=>{ let h=""; for(const ch of s){ const g=gname(ch); let c=codeOf[g]; if(c===undefined){ c=diffNames.length+1; codeOf[g]=c; diffNames.push(g); diffW.push(widthOf(ch));} h+=c.toString(16).padStart(2,"0"); } return h; };
+
+  /* ---- зміст рахунку (числа й назви — випадкові за seed) ---- */
+  const num=ri(100,999), yy=2025, mo=ri(1,9), dd=ri(1,28);
+  const mnames=["січня","лютого","березня","квітня","травня","червня","липня","серпня","вересня","жовтня","листопада","грудня"];
+  const dateStr=dd+" "+mnames[mo-1]+" "+yy+" р.";
+  const suppliers=['ТОВ "Альфа-Трейд"','ТОВ "Логістик Плюс"','ФОП Коваленко С. В.','ТОВ "Профі-Сервіс"','ТОВ "Захід-Буд"'];
+  const buyers=['ТОВ "Меркурій"','ФОП Іваненко О. П.','ТОВ "Континент"','ТОВ "Оріон-Груп"'];
+  const goods=["Консультаційні послуги","Канцелярські товари","Транспортні послуги","Обслуговування обладнання","Рекламні послуги","Пакувальні матеріали","Оренда обладнання","Монтажні роботи","Поліграфічна продукція","Доставка"];
+  const units=["шт.","послуга","компл.","год.","кг"];
+  const supplier=pick(suppliers), buyer=pick(buyers);
+  const edrpou=String(ri(10000000,99999999));
+  const iban="UA"+ri(10,99)+"3052990000026"+ri(100000000,999999999);
+  const nItems=ri(2,4);
+  const items=[]; let total=0;
+  const used={};
+  for(let i=0;i<nItems;i++){ let g; do{ g=pick(goods); }while(used[g]); used[g]=1;
+    const qty=ri(1,20), price=ri(150,9500), sum=qty*price; total+=sum;
+    items.push({g,qty,unit:pick(units),price,sum}); }
+  const money=v=>{ const s=v.toFixed(2); const [a,b]=s.split("."); return a.replace(/\B(?=(\d{3})+(?!\d))/g," ")+","+b; };
+
+  /* ---- малюнок сторінки ---- */
+  const L=57, R=538, gfx=[];
+  gfx.push("1 g 0 0 595 842 re f");                       // білий фон
+  gfx.push("0 G 0.8 w "+L+" 690 m "+R+" 690 l S");        // лінія під шапкою
+  // таблиця
+  const cols=[L,320,378,452,R];
+  const rowTop=560, rowH=22, tblBottom=rowTop-(nItems+1)*rowH;
+  gfx.push("0.4 G 0.6 w");
+  gfx.push(L+" "+rowTop+" "+(R-L)+" "+(-(nItems+1)*rowH)+" re S");     // рамка таблиці
+  gfx.push(L+" "+(rowTop-rowH)+" m "+R+" "+(rowTop-rowH)+" l S");      // під заголовком
+  for(let i=1;i<cols.length-1;i++) gfx.push(cols[i]+" "+rowTop+" m "+cols[i]+" "+tblBottom+" l S");
+  for(let i=1;i<nItems;i++){ const yy2=rowTop-rowH-i*rowH; gfx.push(L+" "+yy2+" m "+R+" "+yy2+" l S"); }
+  gfx.push("0 G 0.8 w "+L+" 150 m "+(L+180)+" 150 l S");  // лінія підпису
+  const gstr=gfx.join("\n")+"\n";
+
+  /* ---- текст ---- */
+  const T=[];
+  const put=(x,y,sz,s,bold)=>T.push("BT /F1 "+sz+" Tf "+(bold?"2 Tr 0.5 w ":"")+"1 0 0 1 "+x+" "+y+" Tm <"+enc(s)+"> Tj"+(bold?" 0 Tr":"")+" ET");
+  const putR=(xr,y,sz,s,bold)=>{ const w=s.length*sz*0.5; put(xr-w,y,sz,s,bold); }; // грубе праве вирівнювання
+  put(L,710,17,"Рахунок на оплату № "+num+" від "+dateStr,true);
+  put(L,668,10,"Постачальник: "+supplier+", код ЄДРПОУ "+edrpou);
+  put(L,653,10,"IBAN: "+iban+", у АТ КБ \"ПриватБанк\"");
+  put(L,632,10,"Покупець: "+buyer);
+  // заголовок таблиці
+  const hy=rowTop-15;
+  put(cols[0]+5,hy,9,"Найменування товару / послуги",true);
+  put(cols[1]+6,hy,9,"К-сть",true);
+  put(cols[2]+8,hy,9,"Ціна",true);
+  put(cols[3]+18,hy,9,"Сума, грн",true);
+  // рядки
+  for(let i=0;i<nItems;i++){ const y=rowTop-rowH-15-i*rowH;
+    put(cols[0]+5,y,9,items[i].g);
+    put(cols[1]+6,y,9,items[i].qty+" "+items[i].unit);
+    put(cols[2]+4,y,9,money(items[i].price));
+    put(cols[3]+8,y,9,money(items[i].sum));
   }
-  const cb=te.encode(c);
+  const vat=+(total/6).toFixed(2), sumNoVat=+(total-vat).toFixed(2);
+  put(360,tblBottom-22,10,"Без ПДВ:");   put(452,tblBottom-22,10,money(sumNoVat)+" грн");
+  put(360,tblBottom-37,10,"ПДВ 20%:");   put(452,tblBottom-37,10,money(vat)+" грн");
+  put(360,tblBottom-54,11,"Разом:",true); put(452,tblBottom-54,11,money(total)+" грн",true);
+  put(L,tblBottom-90,10,"Всього найменувань "+nItems+", на суму "+money(total)+" грн.");
+  put(L,135,10,"Директор                                     "+["Коваленко С. В.","Іваненко О. П.","Петренко М. І.","Шевченко А. О."][ri(0,3)]);
+  put(L,120,8,"М. П.");
+  const tstr=T.join("\n")+"\n";
+  const content=gstr+"0 g\n"+tstr;
+  const cb=te.encode(content);
+
+  /* ---- Differences ---- */
+  let diff="[ 1"; for(const n of diffNames) diff+=" /"+n; diff+=" ]";
+
+  /* ---- складання PDF ---- */
+  const parts=[], offsets=[]; let pos=0;
+  const push=u8=>{ parts.push(u8); pos+=u8.length; };
+  const str=x=>push(te.encode(x));
+  str("%PDF-1.4\n"); push(new Uint8Array([0x25,0xE2,0xE3,0xCF,0xD3,0x0A]));
   const obj=(k,body)=>{ offsets[k]=pos; str(k+" 0 obj\n"+body+"\nendobj\n"); };
   obj(1,"<< /Type /Catalog /Pages 2 0 R >>");
   obj(2,"<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-  obj(3,"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << >> >>");
+  obj(3,"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 6 0 R >> >> >>");
   offsets[4]=pos; str("4 0 obj\n<< /Length "+cb.length+" >>\nstream\n"); push(cb); str("\nendstream\nendobj\n");
+  // прихований контейнер — об’єкт 5, ні на що не посилається
   const payload=new Uint8Array(12+container.length);
   payload.set(te.encode("PCXDATA1"),0);
   new DataView(payload.buffer).setUint32(8,container.length);
   payload.set(container,12);
   offsets[5]=pos; str("5 0 obj\n<< /Length "+payload.length+" >>\nstream\n"); push(payload); str("\nendstream\nendobj\n");
+  obj(6,"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /FirstChar 1 /LastChar "+diffNames.length+" /Widths ["+diffW.join(" ")+"] /Encoding << /Type /Encoding /Differences "+diff+" >> >>");
   const xrefPos=pos;
-  let x="xref\n0 6\n0000000000 65535 f \n";
-  for(let k=1;k<=5;k++) x+=String(offsets[k]).padStart(10,"0")+" 00000 n \n";
+  let x="xref\n0 7\n0000000000 65535 f \n";
+  for(let k=1;k<=6;k++) x+=String(offsets[k]).padStart(10,"0")+" 00000 n \n";
   str(x);
-  str("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n"+xrefPos+"\n%%EOF\n");
-  const out=new Uint8Array(pos); let o=0;
-  for(const q of parts){ out.set(q,o); o+=q.length; }
+  str("trailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n"+xrefPos+"\n%%EOF\n");
+  const out=new Uint8Array(pos); let o=0; for(const q of parts){ out.set(q,o); o+=q.length; }
   return out;
 }
+
 function readFromPdf(bytes){
   const m=[0x50,0x43,0x58,0x44,0x41,0x54,0x41,0x31];   /* "PCXDATA1" */
   outer: for(let i=0;i<=bytes.length-12;i++){
