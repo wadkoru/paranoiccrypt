@@ -180,8 +180,6 @@
   .act-row .primary{flex:1;margin-top:6px}
   .primary.icon{flex:0 0 58px;min-width:58px;padding:0;gap:0}
   .primary.icon svg{display:block}
-  #resultPic{display:block;width:100%;max-width:280px;margin:12px auto 0;border-radius:14px;
-    border:1px solid var(--line);-webkit-touch-callout:default}
   .share-row{display:flex;gap:8px;margin:8px 0 0}
   .share-row a{flex:1;text-align:center;padding:11px 4px;border-radius:13px;text-decoration:none;
     border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--dim);font-size:.88rem;font-weight:600}
@@ -306,27 +304,7 @@
 
     <div class="step locked" id="stepMeme">
       <div class="step-head"><i>3</i><span data-i18n="encStep3">Як виглядатиме файл</span></div>
-      <div class="segmented" id="kindPick">
-        <button data-kind="pdf" class="on" data-i18n="kindPdf">📄 Документ PDF</button>
-        <button data-kind="pic" data-i18n="kindPic">🖼️ Картинка</button>
-      </div>
-      <p class="note" id="kindNote"></p>
-      <div id="picBlock" class="hidden">
-      <div class="segmented" id="imgMode">
-        <button data-mode="meme" class="on" data-i18n="modeMeme">🎲 Готовий мем</button>
-        <button data-mode="own" data-i18n="modeOwn">📷 Своя картинка</button>
-      </div>
-      <div class="segmented" id="fmtPick">
-        <button data-fmt="jpeg" class="on" data-i18n="fmtPhoto">📷 Як фото</button>
-        <button data-fmt="png" data-i18n="fmtPixels">🖼️ У пікселях</button>
-      </div>
-      <p class="note" id="fmtNote"></p>
-      <canvas id="preview" width="320" height="320"></canvas>
-      <p class="vlabel" id="variantName"></p>
-      <button class="ghost" id="btnDice" data-i18n="btnDice">🎲 Іншу картинку</button>
-      <label class="ghost" id="btnOwnPick" for="ownFile" style="display:none" data-i18n="btnOwnPick">📷 Вибрати свою картинку</label>
-      <input type="file" id="ownFile" accept="image/*">
-      </div>
+      <p class="note" id="kindNote" data-i18n="kindNotePdf">Найнадійніше. Виглядає як звичайний скан документа, месенджери ніколи не стискають PDF — файл дійде цілим.</p>
     </div>
 
     <button class="primary" id="btnEncrypt" data-i18n="btnEncrypt" disabled>🔒 Зашифрувати</button>
@@ -342,9 +320,7 @@
         <button class="primary" id="btnDownloadPng" data-i18n="btnSave">⬇️ Зберегти</button>
         <button class="primary icon" id="btnSharePng" data-i18n-title="btnShare"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
       </div>
-      <button class="ghost" id="btnDownloadRaw" data-i18n="saveRaw">Зберегти без картинки</button>
-      <img id="resultPic" class="hidden" alt="">
-      <p class="note hidden" id="picHold"></p>
+      <button class="ghost" id="btnDownloadRaw" data-i18n="saveRaw">Зберегти без маскування</button>
       <p class="note hidden" id="saveHint"></p>
       <p class="note" id="shareAsFile"></p>
       <p class="alert" data-i18n-html="alertFile">📨 <span>Надсилай картинку <b>як файл</b>, не як фото — інакше все зникне.</span></p>
@@ -465,18 +441,15 @@ uk:{
  badge:"Зроблено в Україні", offlineBtn:"⬇️ Скачати офлайн-версію",
  p2pLink:"💬 Приватний P2P-чат і дзвінки",
  offlineDone:"✅ Збережено — працює без інтернету", offlineWait:"Готую файл…",
- picHold:"Не вдається зберегти кнопкою? Натисни й потримай цю картинку — «Зберегти зображення».",
  saveHint:"Файл не зберігся або має дивне ім’я? Це вада вбудованих браузерів. Натисни кнопку зі стрілкою поруч і обери застосунок — або відкрий сторінку в Chrome.", tagline:"Ховає твій файл у картинку 🖼️",
  encStep1:"Вибери файл", tapHere:"Натисни тут", anyFile:"фото, відео, документ — будь-що",
  encStep2:"Захист", noteSimple:"Один ключ. Швидко й надійно.",
  noteMedium:"Два незалежні ключі: AES-256-GCM, а поверх нього ChaCha20-Poly1305. Потрібні ОБИДВА.",
  timerOff:"Без обмежень — відкривати можна завжди", timerOn:"Після цього часу файл більше не відкриється",
  h15:"15 хв", h30:"30 хв", h1:"1 год", h3:"3 год", h6:"6 год", h12:"12 год",
- encStep3:"Як виглядатиме файл", modeMeme:"🎲 Готовий мем", modeOwn:"📷 Своя картинка",
- btnDice:"🎲 Іншу картинку", btnOwnPick:"📷 Вибрати свою картинку",
- picN:"картинка № {n} зі 100", picOwn:"твоя картинка", picHint:"будь-яке фото з телефона", picTap:"натисни кнопку нижче",
+ encStep3:"Як виглядатиме файл",
  encStep4:"Збережи обидва!", key1:"🔑 КЛЮЧ", key1n:"🔑 КЛЮЧ 1", key2:"🔑 КЛЮЧ 2",
- resDone:"Готово — збережи обидва!", resPic:"① КАРТИНКА З ФАЙЛОМ",
+ resDone:"Готово — збережи обидва!",
  resKey1:"② КЛЮЧ", resKey1n:"② КЛЮЧ 1", resKey2:"③ КЛЮЧ 2",
  btnSave:"⬇️ Зберегти", btnShare:"📤 Поділитися", btnCopy:"📋 Копіювати",
  needOne:"🔑 Для цього файлу потрібен один ключ", needBoth:"🔐 Подвійне шифрування — потрібні ОБИДВА ключі",
@@ -493,7 +466,7 @@ uk:{
  decStep1:"Вибери файл", picWithFile:"документ PDF або картинка з прихованим",
  decStep2:"Встав ключ (або обидва)", keyPh:"Встав ключ. Якщо їх два — обидва сюди, у будь-якому порядку",
  btnPaste:"📋 Вставити ключ", decStep3:"Готово", saveOut:"⬇️ Зберегти файл", shareOut:"📤 Поділитися файлом",
- stEnc:"Шифрую файл…", stDraw:"Малюю картинку…", stOwn:"Ховаю у твою картинку…", stCheck:"Перевіряю…",
+ stEnc:"Шифрую файл…", stDraw:"Готую документ…", stCheck:"Перевіряю…",
  stDone:"Готово! Розмір: ", stRead:"Читаю картинку…", stOpen:"Розшифровую…", stDoneDec:"Готово: ",
  stAccepted:"Файл прийнято. Встав ключ і натисни «Розшифрувати».", stExpired:"Термін дії цього файлу минув — відкрити неможливо.",
  expUntil:"⏳ Відкрити можна до ", expNone:"♾️ Без обмежень у часі",
@@ -505,35 +478,28 @@ uk:{
  info3:"<span>🔑</span><span>Загубив ключ — файл не відкриє ніхто й ніколи.</span>",
  badPic:"Цей браузер зіпсував картинку. Натисни «Зберегти без картинки».",
  foundInside:"файл знайдено всередині",
- kindPdf:"📄 Документ PDF", kindPic:"🖼️ Картинка", resDoc:"① ДОКУМЕНТ",
+ resDoc:"① ДОКУМЕНТ",
  kindNotePdf:"Найнадійніше. Виглядає як звичайний скан документа, месенджери ніколи не стискають PDF — файл дійде цілим.",
- kindNotePic:"Файл ховається в картинку. Надсилай лише як ФАЙЛ/документ: фото месенджери стискають, і сховане гине.",
  selfTest:"🧪 Перевірити, що все працює", selfOk:"✅ Усе працює на цьому пристрої",
  selfFail:"❌ Не спрацювало на цьому пристрої",
- fmtPhoto:"📷 Як фото", fmtPixels:"🖼️ У пікселях",
- fmtNotePhoto:"JPEG, як знімок з телефона. Файл у рази менший. Дані дописані в кінець файлу.",
- fmtNotePixels:"PNG, дані заховані в самих пікселях — непомітно навіть у редакторі, але файл важчий.",
- shareAsFile:"Кнопка зі стрілкою надсилає картинку як ФАЙЛ — саме так дані не пропадуть.",
+  shareAsFile:"Кнопка зі стрілкою надсилає картинку як ФАЙЛ — саме так дані не пропадуть.",
  errRecompressed:"Це JPEG. Сховані дані бувають лише в PNG — цю картинку стиснув месенджер або галерея, і сховане знищено безповоротно. Попроси надіслати її ще раз як ФАЙЛ (документ), а не як фото.",
- errNoData:"У цьому файлі немає даних ParanoicCrypt. Потрібна картинка PNG, створена цією програмою, або файл .cbx.", noPic:"Не вдалося відкрити цю картинку. Спробуй іншу.", expired:"вичерпано"
+ errNoData:"У цьому файлі немає даних ParanoicCrypt. Потрібна картинка PNG, створена цією програмою, або файл .cbx.", expired:"вичерпано"
 },
 en:{
  tabEnc:"Encrypt", tabDec:"Decrypt", btnEncrypt:"🔒 Encrypt", btnDecrypt:"🔓 Decrypt",
  badge:"Made in Ukraine", offlineBtn:"⬇️ Download offline version",
  p2pLink:"💬 Private P2P chat & calls",
  offlineDone:"✅ Saved — works without internet", offlineWait:"Preparing the file…",
- picHold:"Button not working? Press and hold this picture — “Save image”.",
  saveHint:"File not saved or has a strange name? That is a flaw of built-in browsers. Tap the arrow button next to it and pick an app — or open the page in Chrome.", tagline:"Hides your file inside a picture 🖼️",
  encStep1:"Choose a file", tapHere:"Tap here", anyFile:"photo, video, document — anything",
  encStep2:"Protection", noteSimple:"One key. Fast and solid.",
  noteMedium:"Two independent keys: AES-256-GCM with ChaCha20-Poly1305 on top. BOTH are required.",
  timerOff:"No limit — can be opened any time", timerOn:"After this time the file will no longer open",
  h15:"15 min", h30:"30 min", h1:"1 hour", h3:"3 hours", h6:"6 hours", h12:"12 hours",
- encStep3:"What the file looks like", modeMeme:"🎲 Ready meme", modeOwn:"📷 Your picture",
- btnDice:"🎲 Another picture", btnOwnPick:"📷 Pick your picture",
- picN:"picture {n} of 100", picOwn:"your picture", picHint:"any photo from your phone", picTap:"tap the button below",
+ encStep3:"What the file looks like",
  encStep4:"Save both!", key1:"🔑 KEY", key1n:"🔑 KEY 1", key2:"🔑 KEY 2",
- resDone:"Done — save both!", resPic:"① PICTURE WITH THE FILE",
+ resDone:"Done — save both!",
  resKey1:"② KEY", resKey1n:"② KEY 1", resKey2:"③ KEY 2",
  btnSave:"⬇️ Save", btnShare:"📤 Share", btnCopy:"📋 Copy",
  needOne:"🔑 This file needs one key", needBoth:"🔐 Double encryption — BOTH keys required",
@@ -550,7 +516,7 @@ en:{
  decStep1:"Choose the file", picWithFile:"a PDF document or a picture with hidden data",
  decStep2:"Paste the key (or both)", keyPh:"Paste the key. If there are two — both here, in any order",
  btnPaste:"📋 Paste key", decStep3:"Done", saveOut:"⬇️ Save file", shareOut:"📤 Share file",
- stEnc:"Encrypting…", stDraw:"Drawing the picture…", stOwn:"Hiding in your picture…", stCheck:"Verifying…",
+ stEnc:"Encrypting…", stDraw:"Preparing the document…", stCheck:"Verifying…",
  stDone:"Done! Size: ", stRead:"Reading the picture…", stOpen:"Decrypting…", stDoneDec:"Done: ",
  stAccepted:"File accepted. Paste the key and press “Decrypt”.", stExpired:"This file has expired — it cannot be opened.",
  expUntil:"⏳ Can be opened until ", expNone:"♾️ No time limit",
@@ -562,17 +528,13 @@ en:{
  info3:"<span>🔑</span><span>Lose the key and nobody will ever open the file.</span>",
  badPic:"This browser damaged the picture. Press “Save without picture”.",
  foundInside:"file found inside",
- kindPdf:"📄 PDF document", kindPic:"🖼️ Picture", resDoc:"① DOCUMENT",
+ resDoc:"① DOCUMENT",
  kindNotePdf:"Most reliable. Looks like an ordinary scanned document; messengers never compress PDFs, so the file arrives intact.",
- kindNotePic:"The file hides inside a picture. Send only as a FILE/document: messengers compress photos and destroy hidden data.",
  selfTest:"🧪 Check that everything works", selfOk:"✅ Everything works on this device",
  selfFail:"❌ Failed on this device",
- fmtPhoto:"📷 As a photo", fmtPixels:"🖼️ In the pixels",
- fmtNotePhoto:"JPEG, like a phone snapshot. Much smaller file. Data is appended at the end of the file.",
- fmtNotePixels:"PNG, data hidden inside the pixels — invisible even in an editor, but the file is heavier.",
- shareAsFile:"The arrow button sends the picture as a FILE — that is how the data survives.",
+  shareAsFile:"The arrow button sends the picture as a FILE — that is how the data survives.",
  errRecompressed:"This is a JPEG. Hidden data lives only in PNG — this picture was recompressed by a messenger or gallery, so the hidden data is gone for good. Ask for it to be sent again as a FILE (document), not as a photo.",
- errNoData:"This file contains no ParanoicCrypt data. You need a PNG made by this app, or a .cbx file.", noPic:"Could not open this picture. Try another one.", expired:"expired"
+ errNoData:"This file contains no ParanoicCrypt data. You need a PNG made by this app, or a .cbx file.", expired:"expired"
 }};
 let lang = (()=>{ try{ return localStorage.getItem("pc_lang") || ((navigator.language||"").toLowerCase().startsWith("uk")?"uk":"en"); }catch{ return "uk"; } })();
 function t(key,vars){
@@ -940,162 +902,17 @@ function fmtLeft(sec){
   return h? h+" "+t("u_h")+" "+m+" "+t("u_m") : m+" "+t("u_m");
 }
 
-/* ==================== МЕМИ: 100 варіантів, малюються тут ==================== */
-const CAPTIONS=[
-  ["я о 23:59","ще одне відео і спати"],
-  ["кава о 8 ранку","кава о 8 вечора"],
-  ["сказав «зараз встану»","минуло 40 хвилин"],
-  ["мій план на день","реальність"],
-  ["коли вимкнули світло","а павербанк на 3%"],
-  ["я на дієті","холодильник о 2 ночі"],
-  ["мама: «що за шум?»","нічого, мам"],
-  ["понеділок","вже втомився"],
-  ["зарплата прийшла","зарплата пішла"],
-  ["сказали «на 5 хвилин»","сиджу третю годину"],
-  ["я в спортзалі","перший і останній раз"],
-  ["знайшов гроші","у старій куртці"],
-  ["сусід зверху","о 7 ранку в суботу"],
-  ["мій кіт о 4 ранку","режим ракети"],
-  ["поїзд затримується","а ти вже на вокзалі"],
-  ["почав прибирання","знайшов старі фото"],
-  ["я перед екзаменом","я після екзамену"],
-  ["обіцяв собі","лягати раніше"],
-  ["автобус приїхав","а ти ще далеко"],
-  ["дощ почався","рівно коли я вийшов"],
-  ["купив абонемент","ходив двічі"],
-  ["останній шматок піци","святе"],
-  ["телефон на 1%","зарядка вдома"],
-  ["«я не голодний»","з'їв усе"],
-  ["п'ятниця 18:00","найкращі 5 хвилин тижня"]
-];
-const CAPTIONS_EN=[
-  ["me at 11:59 pm","one more video then sleep"],
-  ["coffee at 8 am","coffee at 8 pm"],
-  ["said i'd get up now","forty minutes later"],
-  ["my plan for today","what actually happened"],
-  ["the power goes out","power bank at 3%"],
-  ["me on a diet","the fridge at 2 am"],
-  ["mom: what's that noise?","nothing, mom"],
-  ["monday","already tired"],
-  ["payday arrives","payday leaves"],
-  ["they said five minutes","hour three"],
-  ["me at the gym","first and last time"],
-  ["found money","in an old jacket"],
-  ["upstairs neighbour","7 am on a saturday"],
-  ["my cat at 4 am","rocket mode"],
-  ["train is delayed","you are already there"],
-  ["started cleaning","found old photos"],
-  ["me before the exam","me after the exam"],
-  ["promised myself","an early bedtime"],
-  ["the bus arrives","you are still far away"],
-  ["rain starts","exactly when i step out"],
-  ["bought a gym pass","went twice"],
-  ["last slice of pizza","sacred"],
-  ["phone at 1%","charger at home"],
-  ["said i am not hungry","ate everything"],
-  ["friday 6 pm","best five minutes of the week"]
-];
-const PALETTES=[["#12263f","#5a1e4a"],["#0f3d2e","#1d4f2a"],["#4a2b0f","#6b1b1b"],["#2a1b4a","#0f2a4a"]];
-const EMOJIS=["🐱","🧊","🕶️","🔐","🦉","🧠","🐸","🛸","🗝️","🐙","🥷","📦","🧿","🦊","🪬","🧩","🐧","🔒","🌒","🦈","🧨","🪤","🛰️","🐺","🎭"];
-
+/* ==================== Стеганографія (лише читання): 2 біти в каналі ====================
+   Приховування у картинку прибрано з інтерфейсу шифрування — тепер лише PDF (спосіб 3
+   нижче). readBytes/chanIdx лишились, щоб і далі відкривати картинки, зашифровані
+   попередніми версіями цього застосунку — той, хто отримав такий файл роки тому, не
+   повинен втратити доступ через оновлення дизайну. ==================== */
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-function memeText(ctx,text,cx,cy,maxW,size){
-  ctx.textAlign="center"; ctx.textBaseline="middle";
-  let s=size;
-  for(;;){
-    ctx.font='bold '+s+'px "Arial Black", Impact, system-ui, sans-serif';
-    if(ctx.measureText(text).width<=maxW||s<=9) break;
-    s-=Math.max(1,Math.floor(s*0.08));
-  }
-  ctx.lineJoin="round"; ctx.lineWidth=Math.max(2,s*0.17); ctx.strokeStyle="#000";
-  ctx.strokeText(text,cx,cy); ctx.fillStyle="#fff"; ctx.fillText(text,cx,cy);
-}
-function drawPattern(ctx,x,y,w,h,style,rng){
-  ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
-  ctx.globalAlpha=0.16;
-  for(let i=0;i<30;i++){
-    ctx.fillStyle=i%2?"#ffffff":"#000000";
-    const px=x+rng()*w, py=y+rng()*h, r=(0.04+rng()*0.16)*w;
-    if(style===0){ ctx.beginPath(); ctx.arc(px,py,r,0,6.2832); ctx.fill(); }
-    else if(style===1){ ctx.fillRect(px,py,r*1.6,r*0.22); }
-    else if(style===2){ ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+r,py+r*0.7); ctx.lineTo(px-r*0.4,py+r); ctx.closePath(); ctx.fill(); }
-    else { ctx.fillRect(px,py,r*0.5,r*0.5); }
-  }
-  ctx.restore(); ctx.globalAlpha=1;
-}
-function drawMeme(ctx,w,h,variant){
-  const v=((variant%100)+100)%100;
-  const caps = (typeof lang!=="undefined" && lang==="en") ? CAPTIONS_EN : CAPTIONS;
-  const style=Math.floor(v/25)%4, cap=caps[v%25], pal=PALETTES[style], rng=mulberry32(v*7919+13);
-
-  if(style<2){
-    const g=ctx.createLinearGradient(0,0,w,h);
-    g.addColorStop(0,pal[0]); g.addColorStop(1,pal[1]);
-    ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
-    drawPattern(ctx,0,0,w,h,style,rng);
-    ctx.font=Math.floor(h*0.30)+'px serif';
-    ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(EMOJIS[v%EMOJIS.length],w/2,h*0.52);
-    memeText(ctx,cap[0].toUpperCase(),w/2,h*0.13,w*0.92,h*0.105);
-    memeText(ctx,cap[1].toUpperCase(),w/2,h*0.88,w*0.92,h*0.105);
-    return;
-  }
-
-  // двопанельний формат: ліворуч реакція, праворуч підпис
-  const half=h/2;
-  for(let i=0;i<2;i++){
-    const y=i*half;
-    ctx.fillStyle=pal[i];
-    ctx.fillRect(0,y,w,half);
-    drawPattern(ctx,0,y,w,half,style,rng);
-    ctx.font=Math.floor(half*0.44)+'px serif';
-    ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText(EMOJIS[(v+i*7)%EMOJIS.length],w*0.19,y+half*0.5);
-    memeText(ctx,cap[i].toUpperCase(),w*0.67,y+half*0.5,w*0.56,half*0.19);
-  }
-  ctx.strokeStyle="rgba(0,0,0,.7)"; ctx.lineWidth=Math.max(2,w*0.006);
-  ctx.beginPath(); ctx.moveTo(0,half); ctx.lineTo(w,half); ctx.stroke();
-}
-function variantName(variant){
-  const v=((variant%100)+100)%100;
-  return EMOJIS[v%EMOJIS.length]+" "+CAPTIONS[v%25][0];
-}
-
-/* ==================== Стеганографія: 2 біти в каналі ==================== */
 function chanIdx(k){ return ((k/3)|0)*4+(k%3); }
-function writeBytes(data,startK,bytes){
-  let k=startK;
-  for(let i=0;i<bytes.length;i++){
-    const by=bytes[i];
-    for(let sh=6;sh>=0;sh-=2){ const idx=chanIdx(k++); data[idx]=(data[idx]&0xFC)|((by>>sh)&3); }
-  }
-  return k;
-}
 function readBytes(data,startK,n){
   const out=new Uint8Array(n); let k=startK;
   for(let i=0;i<n;i++){ let b=0; for(let j=0;j<4;j++){ b=(b<<2)|(data[chanIdx(k++)]&3); } out[i]=b; }
   return {bytes:out,next:k};
-}
-function sideForBytes(n){
-  const pixels=Math.ceil(n*4/3)+64;
-  return Math.max(480,Math.ceil(Math.sqrt(pixels))+2);
-}
-function makeMemeCanvas(side,variant){
-  const cv=document.createElement("canvas"); cv.width=side; cv.height=side;
-  drawMeme(cv.getContext("2d",{willReadFrequently:true}),side,side,variant);
-  return cv;
-}
-async function embedIntoCanvas(cv,stego){
-  const ctx=cv.getContext("2d",{willReadFrequently:true});
-  const img=ctx.getImageData(0,0,cv.width,cv.height);
-  const capacity=Math.floor((img.data.length/4)*3/4);
-  if(stego.length>capacity) throw new UserError("Файл не вміщається в цю картинку.");
-  for(let p=3;p<img.data.length;p+=4) img.data[p]=255;
-  writeBytes(img.data,0,stego);
-  ctx.putImageData(img,0,0);
-  const blob=await new Promise((res)=>cv.toBlob(res,"image/png"));
-  if(!blob) throw new UserError("Браузер не зміг створити картинку.");
-  return blob;
 }
 /* ===== Спосіб 3 (за замовчуванням): документ PDF =====
    Справжній PDF на одну сторінку A4, схожий на блідий скан. Дані — окремий обʼєкт,
@@ -1253,61 +1070,12 @@ function scanName(){
    Переживає будь-яке ПОБАЙТОВЕ пересилання (документом), але, як і піксельний
    спосіб, не переживає перестискання месенджером. */
 const TAIL_MAGIC="PCXJ";
-function appendToBytes(imgBytes,container){
-  const out=new Uint8Array(imgBytes.length+container.length+8);
-  out.set(imgBytes,0);
-  out.set(container,imgBytes.length);
-  const dv=new DataView(out.buffer);
-  dv.setUint32(imgBytes.length+container.length, container.length);
-  out.set(te.encode(TAIL_MAGIC), imgBytes.length+container.length+4);
-  return out;
-}
 function readAppended(bytes){
   if(!bytes||bytes.length<16) return null;
   if(td.decode(bytes.slice(bytes.length-4))!==TAIL_MAGIC) return null;
   const len=new DataView(bytes.buffer,bytes.byteOffset+bytes.length-8,4).getUint32(0);
   if(len<=0||len>bytes.length-8) return null;
   return bytes.slice(bytes.length-8-len, bytes.length-8);
-}
-async function hideAsPhoto(container,variant,ownFile){
-  let imgBytes;
-  if(ownFile){
-    imgBytes=new Uint8Array(await ownFile.arrayBuffer());   /* фото користувача — без змін */
-  }else{
-    const cv=makeMemeCanvas(1024,variant);
-    const jpg=await new Promise((r)=>cv.toBlob(r,"image/jpeg",0.82));
-    if(!jpg) throw new UserError("Браузер не зміг створити картинку.");
-    imgBytes=new Uint8Array(await jpg.arrayBuffer());
-  }
-  const bytes=appendToBytes(imgBytes,container);
-  const type=(ownFile&&ownFile.type)||"image/jpeg";
-  return {blob:new Blob([bytes],{type}), side:1024};
-}
-async function hideInMeme(container,variant){
-  const stego=concat(te.encode(STEGO_MAGIC),u32(container.length),container);
-  const side=sideForBytes(stego.length);
-  if(side>6000) throw new UserError("Файл завеликий для картинки. Обери менший файл або натисни «Зберегти без картинки».");
-  const blob=await embedIntoCanvas(makeMemeCanvas(side,variant),stego);
-  return {blob,side};
-}
-/* Своя картинка: за потреби збільшуємо її так, щоб файл помістився */
-async function hideInOwnImage(container,src){
-  const stego=concat(te.encode(STEGO_MAGIC),u32(container.length),container);
-  const need=Math.ceil(stego.length*4/3)+64;
-  let w=src.width||src.naturalWidth, h=src.height||src.naturalHeight;
-  if(!w||!h) throw new UserError("Не вдалося прочитати цю картинку.");
-  if(w*h<need){ const k=Math.sqrt(need/(w*h)); w=Math.ceil(w*k); h=Math.ceil(h*k); }
-  if(w*h>36e6) throw new UserError("Файл завеликий для цієї картинки. Обери більшу картинку або менший файл.");
-  const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
-  cv.getContext("2d",{willReadFrequently:true}).drawImage(src,0,0,w,h);
-  const blob=await embedIntoCanvas(cv,stego);
-  return {blob,side:Math.max(w,h)};
-}
-async function loadImageAny(file){
-  try{
-    if(typeof createImageBitmap==="function") return await withTimeout(createImageBitmap(file),6000);
-  }catch{}
-  return withTimeout(loadAsImageElement(file),15000);
 }
 function loadAsImageElement(file){
   return new Promise((resolve,reject)=>{
@@ -1354,8 +1122,7 @@ async function readFromPixels(file){
 
 /* ==================== ІНТЕРФЕЙС ==================== */
 let encFile=null, encOut=null, decBytes=null, decOut=null, busy=false;
-let selMin=0, variant=Math.floor(Math.random()*100), level=1, picUrl=null, fmt='jpeg', ownFile=null, kind='pdf';
-let imgMode="meme", ownImg=null;
+let selMin=0, level=1;
 
 function setBusy(v){
   busy=v;
@@ -1382,35 +1149,6 @@ function fmtDeadline(unix){
   const tm=d.toLocaleTimeString(loc,{hour:"2-digit",minute:"2-digit"});
   return d.toDateString()===now.toDateString() ? t("ud_today")+tm : d.toLocaleDateString(loc)+t("ud_at")+tm;
 }
-function refreshPreview(){
-  const ctx=$("preview").getContext("2d");
-  if(imgMode==="own"&&ownImg){
-    const w=ownImg.width||ownImg.naturalWidth, h=ownImg.height||ownImg.naturalHeight;
-    const k=Math.max(320/w,320/h);
-    ctx.fillStyle="#000"; ctx.fillRect(0,0,320,320);
-    ctx.drawImage(ownImg,(320-w*k)/2,(320-h*k)/2,w*k,h*k);
-    $("variantName").textContent=t("picOwn");
-  }else{
-    drawMeme(ctx,320,320,variant);
-    $("variantName").textContent=t("picN",{n:variant+1});
-  }
-}
-function setImgMode(mode){
-  imgMode=mode;
-  for(const b of $("imgMode").children) b.classList.toggle("on",b.dataset.mode===mode);
-  $("btnDice").style.display = mode==="meme" ? "" : "none";
-  $("btnOwnPick").style.display = mode==="own" ? "" : "none";
-  if(mode==="own"&&!ownImg){
-    const ctx=$("preview").getContext("2d");
-    ctx.fillStyle="#0e1626"; ctx.fillRect(0,0,320,320);
-    ctx.fillStyle="#7d8ba3"; ctx.font="600 17px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillText("📷", 160, 138); ctx.font="600 15px system-ui";
-    ctx.fillText(t("picTap"), 160, 176);
-    $("variantName").textContent=t("picHint");
-  }else refreshPreview();
-refreshPreview();
-}
-
 /* --- крок 1: файл --- */
 $("encFile").onchange=(e)=>{
   encFile=e.target.files[0]||null;
@@ -1444,41 +1182,6 @@ $("timePills").addEventListener("click",(e)=>{
   for(const el of $("timePills").children) el.classList.toggle("on",el===b);
 });
 
-/* --- крок 3: картинка --- */
-$("btnDice").onclick=()=>{ variant=Math.floor(Math.random()*100); refreshPreview(); };
-function applyKind(){
-  $("picBlock").classList.toggle("hidden", kind!=="pic");
-  $("kindNote").textContent=t(kind==="pdf"?"kindNotePdf":"kindNotePic");
-  if(kind==="pic") refreshPreview();
-}
-$("kindPick").addEventListener("click",(e)=>{
-  const b=e.target.closest("button[data-kind]"); if(!b) return;
-  kind=b.dataset.kind==="pic"?"pic":"pdf";
-  for(const el of $("kindPick").children) el.classList.toggle("on",el===b);
-  applyKind();
-});
-$("fmtPick").addEventListener("click",(e)=>{
-  const b=e.target.closest("button[data-fmt]"); if(!b) return;
-  fmt=b.dataset.fmt==="png"?"png":"jpeg";
-  for(const el of $("fmtPick").children) el.classList.toggle("on",el===b);
-  $("fmtNote").textContent=t(fmt==="png"?"fmtNotePixels":"fmtNotePhoto");
-  $("kindNote").textContent=t(kind==="pdf"?"kindNotePdf":"kindNotePic");
-});
-$("imgMode").addEventListener("click",(e)=>{
-  const b=e.target.closest("button[data-mode]"); if(b) setImgMode(b.dataset.mode);
-});
-$("ownFile").onchange=async(e)=>{
-  const f=e.target.files[0]; if(!f) return;
-  try{
-    ownFile=f;
-    ownImg=await loadImageAny(f);
-    imgMode="own"; refreshPreview();
-    msg("encStatus","");
-  }catch(err){
-    msg("encStatus",t("noPic"),"err");
-  }
-};
-
 /* --- сховати --- */
 $("btnEncrypt").onclick=async()=>{
   if(!encFile||busy) return;
@@ -1486,37 +1189,19 @@ $("btnEncrypt").onclick=async()=>{
   msg("encStatus",t("stEnc"));
   try{
     const {container,keyTextA,keyTextB,expiry}=await encryptToContainer(encFile,computeExpiry(),level,(p)=>progress("encBar",p*0.7));
-    msg("encStatus", t(imgMode==="own"&&ownImg?"stOwn":"stDraw"));
-    const own = imgMode==="own" ? ownFile : null;
-    let blob, outName;
-    if(kind==="pdf"){
-      blob=new Blob([buildScanPdf(container, crypto.getRandomValues(new Uint32Array(1))[0])],{type:"application/pdf"});
-      outName=scanName();
-    }else{
-      ({blob} = fmt==="jpeg"
-        ? await hideAsPhoto(container,variant,own)
-        : (own ? await hideInOwnImage(container,ownImg) : await hideInMeme(container,variant)));
-    }
+    msg("encStatus", t("stDraw"));
+    const blob=new Blob([buildScanPdf(container, crypto.getRandomValues(new Uint32Array(1))[0])],{type:"application/pdf"});
+    const outName=scanName();
     progress("encBar",0.9);
     msg("encStatus",t("stCheck"));
-    const back = kind==="pdf"
-      ? readFromPdf(new Uint8Array(await blob.arrayBuffer()))
-      : await readFromImage(new File([blob],"check"+(blob.type==="image/png"?".png":".jpg"),{type:blob.type}));
+    const back = readFromPdf(new Uint8Array(await blob.arrayBuffer()));
     const a=new Uint8Array(await crypto.subtle.digest("SHA-256",container));
     const b=new Uint8Array(await crypto.subtle.digest("SHA-256",back));
     if(a.length!==b.length||a.some((x,i)=>x!==b[i]))
       throw new UserError(t("badPic"));
     progress("encBar",1);
-    const ext = blob.type==="image/png" ? ".png" : (blob.type==="image/webp" ? ".webp" : ".jpg");
-    encOut={png:blob,container,name: outName || ("IMG_"+Math.random().toString(16).slice(2,10).toUpperCase()+ext)};
-    if(picUrl) URL.revokeObjectURL(picUrl);
-    picUrl=URL.createObjectURL(blob);
-    $("resultPic").src=picUrl;
-    const isPic = kind==="pic";
-    $("resultPic").classList.toggle("hidden",!isPic);
-    $("picHold").textContent=t("picHold");
-    $("picHold").classList.toggle("hidden",!isPic);
-    $("resLabel").textContent=t(isPic?"resPic":"resDoc");
+    encOut={png:blob,container,name: outName};
+    $("resLabel").textContent=t("resDoc");
     $("resFileName").textContent="📎 "+encOut.name;
     $("keyOut").value=keyTextA;
     $("keyOut2").value=keyTextB||"";
@@ -1693,14 +1378,22 @@ $("btnSelfTest").onclick=async()=>{
     const f=new File([payload],"self-test.bin",{type:"application/octet-stream"});
     const steps=[];
     const r=await encryptToContainer(f,0,2,()=>{});           steps.push("шифрування");
-    /* перевіряємо обидва носії: документ PDF і картинку */
     const pdfBytes=buildScanPdf(r.container,777);               steps.push("pdf");
     const fromPdf=readFromPdf(pdfBytes);
-    const {blob}=await hideAsPhoto(r.container,3,null);        steps.push("картинка");
-    const fromPic=await readFromImage(new File([blob],"c.jpg",{type:"image/jpeg"}));
     if(!fromPdf || fromPdf.length!==r.container.length || fromPdf.some((v,i)=>v!==r.container[i])) throw new Error("PDF");
-    const back=fromPic;
     steps.push("читання");
+    /* спосіб "картинка" прибрано з інтерфейсу, але файли, зашифровані ним у старих
+       версіях, мають і далі відкриватись — перевіряємо це на синтетичному прикладі
+       того самого дописаного формату (imgBytes + контейнер + довжина + "PCXJ") */
+    const fakeImg=new Uint8Array([0xFF,0xD8,0xFF,0xD9]);
+    const legacy=new Uint8Array(fakeImg.length+r.container.length+8);
+    legacy.set(fakeImg,0); legacy.set(r.container,fakeImg.length);
+    new DataView(legacy.buffer).setUint32(fakeImg.length+r.container.length, r.container.length);
+    legacy.set(te.encode("PCXJ"), fakeImg.length+r.container.length+4);
+    const fromLegacy=readAppended(legacy);
+    if(!fromLegacy || fromLegacy.length!==r.container.length || fromLegacy.some((v,i)=>v!==r.container[i])) throw new Error("legacy-картинка");
+    steps.push("старий формат картинки");
+    const back=fromPdf;
     const d=await decryptContainer(back, r.keyTextB+" "+r.keyTextA, ()=>{});
     const outB=new Uint8Array(await d.blob.arrayBuffer());
     const good = outB.length===payload.length && outB.every((v,i)=>v===payload[i]);
@@ -1941,12 +1634,9 @@ if(!isStandalone) $("btnInstall").classList.remove("hidden");
 
 function refreshDynamicLang(){
   if(!$("levelNote")) return;
-  $("fmtNote").textContent=t(fmt==="png"?"fmtNotePixels":"fmtNotePhoto");
   $("levelNote").textContent = t(level===2?"noteMedium":"noteSimple");
   $("timerLabel").textContent = t($("useTimer").checked?"timerOn":"timerOff");
   if(!$("encFile").files.length){ $("encDropTitle").textContent=t("tapHere"); $("encDropSub").textContent=t("anyFile"); }
-  if(imgMode==="meme"){ refreshPreview(); $("variantName").textContent=t("picN",{n:variant+1}); }
-  else $("variantName").textContent=t(ownImg?"picOwn":"picHint");
 
   if($("keyOut").value) $("lblKey1").textContent=t($("keyOut2").value?"resKey1n":"resKey1");
   if(decBytes) updateKeyNeed();
@@ -1983,9 +1673,7 @@ $("btnOffline").onclick=async()=>{
 
 /* --- старт --- */
 applyLang();
-applyKind();
 if(navigator.clipboard?.readText) $("btnPaste").classList.remove("hidden");
-requestAnimationFrame(()=>setTimeout(refreshPreview,0));   /* не тримаємо перший кадр */
 </script>
 </body>
 </html>
