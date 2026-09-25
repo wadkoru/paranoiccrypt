@@ -148,6 +148,9 @@
     background:rgba(255,255,255,.05);color:var(--dim);font-size:.92rem;font-weight:700;cursor:pointer;transition:.15s}
   .segmented button.on{background:linear-gradient(150deg,rgba(0,200,83,.55),rgba(57,255,20,.3));
     color:#fff;border-color:rgba(60,255,150,.6)}
+  .segmented button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
+  .segmented button .soon{display:block;font-size:.62rem;font-weight:800;letter-spacing:.03em;
+    color:var(--gold);margin-top:2px;text-transform:uppercase}
   .install-card{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:80;
     max-width:536px;margin:0 auto;padding:16px;border-radius:22px;
     background:linear-gradient(165deg,rgba(14,32,62,.98),rgba(9,14,26,.98));
@@ -309,6 +312,11 @@
 
     <div class="step locked" id="stepMeme">
       <div class="step-head"><i>3</i><span data-i18n="encStep3">Як виглядатиме файл</span></div>
+      <div class="segmented" id="kindPick">
+        <button data-kind="pdf" class="on" data-i18n="kindPdf">📄 Документ PDF</button>
+        <button data-kind="pic" disabled data-i18n-html="kindPic">🖼️ Картинка<span class="soon">в розробці</span></button>
+        <button data-kind="raw" data-i18n="kindRaw">🔒 Просто файл</button>
+      </div>
       <p class="note" id="kindNote" data-i18n="kindNotePdf">Найнадійніше. Виглядає як звичайний скан документа, месенджери ніколи не стискають PDF — файл дійде цілим.</p>
     </div>
 
@@ -446,7 +454,8 @@ uk:{
  noteMedium:"Два незалежні ключі: AES-256-GCM, а поверх нього ChaCha20-Poly1305. Потрібні ОБИДВА.",
  timerOff:"Без обмежень — відкривати можна завжди", timerOn:"Після цього часу файл більше не відкриється",
  h15:"15 хв", h30:"30 хв", h1:"1 год", h3:"3 год", h6:"6 год", h12:"12 год",
- encStep3:"Як виглядатиме файл",
+ encStep3:"Як виглядатиме файл", kindPdf:"📄 Документ PDF",
+ kindPic:'🖼️ Картинка<span class="soon">в розробці</span>', kindRaw:"🔒 Просто файл",
  encStep4:"Збережи обидва!", key1:"🔑 КЛЮЧ", key1n:"🔑 КЛЮЧ 1", key2:"🔑 КЛЮЧ 2",
  resDone:"Готово — збережи обидва!",
  resKey1:"② КЛЮЧ", resKeyAll:"② КЛЮЧІ (ОБИДВА)",
@@ -479,6 +488,7 @@ uk:{
  foundInside:"файл знайдено всередині",
  resDoc:"① ДОКУМЕНТ",
  kindNotePdf:"Найнадійніше. Виглядає як звичайний скан документа, месенджери ніколи не стискають PDF — файл дійде цілим.",
+ kindNoteRaw:"Без маскування — просто зашифрований файл (.cbx). Найменший розмір, але одразу видно, що це не звичайний документ.",
  selfTest:"🧪 Перевірити, що все працює", selfOk:"✅ Усе працює на цьому пристрої",
  selfFail:"❌ Не спрацювало на цьому пристрої",
   shareAsFile:"Кнопка зі стрілкою надсилає картинку як ФАЙЛ — саме так дані не пропадуть.",
@@ -496,7 +506,8 @@ en:{
  noteMedium:"Two independent keys: AES-256-GCM with ChaCha20-Poly1305 on top. BOTH are required.",
  timerOff:"No limit — can be opened any time", timerOn:"After this time the file will no longer open",
  h15:"15 min", h30:"30 min", h1:"1 hour", h3:"3 hours", h6:"6 hours", h12:"12 hours",
- encStep3:"What the file looks like",
+ encStep3:"What the file looks like", kindPdf:"📄 PDF document",
+ kindPic:'🖼️ Picture<span class="soon">coming soon</span>', kindRaw:"🔒 Plain file",
  encStep4:"Save both!", key1:"🔑 KEY", key1n:"🔑 KEY 1", key2:"🔑 KEY 2",
  resDone:"Done — save both!",
  resKey1:"② KEY", resKeyAll:"② KEYS (BOTH)",
@@ -529,6 +540,7 @@ en:{
  foundInside:"file found inside",
  resDoc:"① DOCUMENT",
  kindNotePdf:"Most reliable. Looks like an ordinary scanned document; messengers never compress PDFs, so the file arrives intact.",
+ kindNoteRaw:"No disguise — just the encrypted file (.cbx). Smallest size, but it is obviously not a regular document.",
  selfTest:"🧪 Check that everything works", selfOk:"✅ Everything works on this device",
  selfFail:"❌ Failed on this device",
   shareAsFile:"The arrow button sends the picture as a FILE — that is how the data survives.",
@@ -1122,6 +1134,7 @@ async function readFromPixels(file){
 /* ==================== ІНТЕРФЕЙС ==================== */
 let encFile=null, encOut=null, decBytes=null, decOut=null, busy=false;
 let lastKeyA="", lastKeyB="";
+let kind="pdf";
 let selMin=0, level=1;
 
 function setBusy(v){
@@ -1182,6 +1195,14 @@ $("timePills").addEventListener("click",(e)=>{
   for(const el of $("timePills").children) el.classList.toggle("on",el===b);
 });
 
+/* --- крок 3: у якому вигляді вийде файл --- */
+$("kindPick").addEventListener("click",(e)=>{
+  const b=e.target.closest("button[data-kind]"); if(!b||b.disabled) return;
+  kind=b.dataset.kind;
+  for(const el of $("kindPick").children) el.classList.toggle("on",el===b);
+  $("kindNote").textContent = t(kind==="raw"?"kindNoteRaw":"kindNotePdf");
+});
+
 /* --- сховати --- */
 $("btnEncrypt").onclick=async()=>{
   if(!encFile||busy) return;
@@ -1190,16 +1211,23 @@ $("btnEncrypt").onclick=async()=>{
   try{
     const {container,keyTextA,keyTextB,expiry}=await encryptToContainer(encFile,computeExpiry(),level,(p)=>progress("encBar",p*0.7));
     msg("encStatus", t("stDraw"));
-    const blob=new Blob([buildScanPdf(container, crypto.getRandomValues(new Uint32Array(1))[0])],{type:"application/pdf"});
-    const outName=scanName();
-    progress("encBar",0.9);
-    msg("encStatus",t("stCheck"));
-    const back = readFromPdf(new Uint8Array(await blob.arrayBuffer()));
-    const a=new Uint8Array(await crypto.subtle.digest("SHA-256",container));
-    const b=new Uint8Array(await crypto.subtle.digest("SHA-256",back));
-    if(a.length!==b.length||a.some((x,i)=>x!==b[i]))
-      throw new UserError(t("badPic"));
-    progress("encBar",1);
+    let blob, outName;
+    if(kind==="raw"){
+      blob=new Blob([container],{type:"application/octet-stream"});
+      outName="paranoiccrypt-"+Math.random().toString(16).slice(2,10)+".cbx";
+      progress("encBar",1);
+    }else{
+      blob=new Blob([buildScanPdf(container, crypto.getRandomValues(new Uint32Array(1))[0])],{type:"application/pdf"});
+      outName=scanName();
+      progress("encBar",0.9);
+      msg("encStatus",t("stCheck"));
+      const back = readFromPdf(new Uint8Array(await blob.arrayBuffer()));
+      const a=new Uint8Array(await crypto.subtle.digest("SHA-256",container));
+      const b=new Uint8Array(await crypto.subtle.digest("SHA-256",back));
+      if(a.length!==b.length||a.some((x,i)=>x!==b[i]))
+        throw new UserError(t("badPic"));
+      progress("encBar",1);
+    }
     encOut={png:blob,container,name: outName};
     $("resLabel").textContent=t("resDoc");
     $("resFileName").textContent="📎 "+encOut.name;
@@ -1629,6 +1657,7 @@ function refreshDynamicLang(){
   if(!$("levelNote")) return;
   $("levelNote").textContent = t(level===2?"noteMedium":"noteSimple");
   $("timerLabel").textContent = t($("useTimer").checked?"timerOn":"timerOff");
+  $("kindNote").textContent = t(kind==="raw"?"kindNoteRaw":"kindNotePdf");
   if(!$("encFile").files.length){ $("encDropTitle").textContent=t("tapHere"); $("encDropSub").textContent=t("anyFile"); }
 
   if($("keyOut").value) $("lblKey1").textContent=t(lastKeyB?"resKeyAll":"resKey1");
