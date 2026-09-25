@@ -40,6 +40,31 @@
   .bg2{position:fixed;inset:0;z-index:-1;pointer-events:none;
     background:radial-gradient(120% 90% at 50% 0%, transparent 40%, rgba(5,7,10,.85) 100%);}
 
+  /* ---------- "цифровий дощ": лише transform-анімація (GPU-шар), без JS і без canvas —
+     не має жодного постійного навантаження на CPU, на відміну від старого відео ---------- */
+  .rain{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:.55}
+  .rain i{position:absolute;top:-35%;width:2px;height:24%;border-radius:2px;font-style:normal;
+    background:linear-gradient(to bottom, transparent, rgba(57,255,20,.9) 55%, transparent 100%);
+    animation:rainFall linear infinite}
+  @keyframes rainFall{ from{transform:translateY(-45vh)} to{transform:translateY(145vh)} }
+  .rain i:nth-child(1){left:2%;animation-duration:7.4s;animation-delay:-.6s}
+  .rain i:nth-child(2){left:9%;animation-duration:9.8s;animation-delay:-4.9s}
+  .rain i:nth-child(3){left:16%;animation-duration:6.6s;animation-delay:-2.3s}
+  .rain i:nth-child(4){left:24%;animation-duration:11.2s;animation-delay:-7.1s}
+  .rain i:nth-child(5){left:31%;animation-duration:8.1s;animation-delay:-.9s}
+  .rain i:nth-child(6){left:39%;animation-duration:7s;animation-delay:-5.4s}
+  .rain i:nth-child(7){left:47%;animation-duration:10.4s;animation-delay:-3.2s}
+  .rain i:nth-child(8){left:54%;animation-duration:6.9s;animation-delay:-1.7s}
+  .rain i:nth-child(9){left:61%;animation-duration:9.1s;animation-delay:-6.6s}
+  .rain i:nth-child(10){left:68%;animation-duration:7.8s;animation-delay:-2.9s}
+  .rain i:nth-child(11){left:75%;animation-duration:11.7s;animation-delay:-8.3s}
+  .rain i:nth-child(12){left:81%;animation-duration:6.3s;animation-delay:-.3s}
+  .rain i:nth-child(13){left:87%;animation-duration:9.6s;animation-delay:-4.1s}
+  .rain i:nth-child(14){left:93%;animation-duration:8.4s;animation-delay:-6s}
+  .rain i:nth-child(15){left:97%;animation-duration:10.9s;animation-delay:-1.4s}
+  .rain i:nth-child(16){left:45%;animation-duration:12.3s;animation-delay:-9.7s}
+  @media (prefers-reduced-motion:reduce){ .rain{display:none} }
+
   /* ---------- шапка ---------- */
   .ua-strip{position:fixed;top:0;left:0;right:0;height:5px;z-index:60;
     background:linear-gradient(#005BBB 0 50%,#FFD500 50% 100%)}
@@ -256,6 +281,7 @@
 </div>
 
 <div class="bg"></div><div class="bg2"></div>
+<div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <div class="ua-strip"></div>
 <div id="fatalError" class="hidden"></div>
 
