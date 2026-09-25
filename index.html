@@ -117,6 +117,11 @@
   @media (prefers-reduced-motion:reduce){ .pulse{animation:none!important} }
   .ghost{width:100%;min-height:48px;margin-top:9px;border-radius:14px;cursor:pointer;
     border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--dim);font-size:.95rem;font-weight:600}
+  .row-small{display:flex;gap:8px;margin-top:8px}
+  .ghost.small{width:auto;flex:1;min-height:38px;margin-top:0;padding:0 10px;font-size:.82rem;font-weight:600}
+  @keyframes copyFlash{0%{transform:scale(1)}35%{transform:scale(1.05)}100%{transform:scale(1)}}
+  .copy-flash{animation:copyFlash .32s ease}
+  @media (prefers-reduced-motion:reduce){ .copy-flash{animation:none!important} }
 
   canvas{width:100%;max-width:260px;border-radius:16px;display:block;margin:0 auto;border:1px solid var(--line)}
   .vlabel{text-align:center;color:var(--dim);font-size:.8rem;margin:8px 0 0}
@@ -328,18 +333,12 @@
       <p class="block-label" id="lblKey1" data-i18n="resKey1">② КЛЮЧ</p>
       <textarea id="keyOut" readonly></textarea>
       <div class="act-row">
-        <button class="primary gold" id="btnCopyKey" data-i18n="btnCopy">📋 Копіювати</button>
+        <button class="primary gold" id="btnCopyAll" data-i18n="btnCopyAll">📋 Скопіювати все</button>
         <button class="primary icon" id="btnShareKey" data-i18n-title="btnShare"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
       </div>
-
-      <div id="key2Block" class="hidden">
-        <p class="block-label" data-i18n="resKey2">③ КЛЮЧ 2</p>
-        <textarea id="keyOut2" readonly></textarea>
-        <div class="act-row">
-          <button class="primary gold" id="btnCopyKey2" data-i18n="btnCopy">📋 Копіювати</button>
-          <button class="primary icon" id="btnShareKey2" data-i18n-title="btnShare"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
-        </div>
-        <button class="ghost" id="btnCopyBoth" data-i18n="copyBoth">📋 Скопіювати обидва ключі</button>
+      <div class="row-small hidden" id="keySeparateRow">
+        <button class="ghost small" id="btnCopyKey1" data-i18n="copyKey1Only">Ключ 1</button>
+        <button class="ghost small" id="btnCopyKey2" data-i18n="copyKey2Only">Ключ 2</button>
       </div>
 
       <p class="deadline" id="expiryLine"></p>
@@ -450,14 +449,14 @@ uk:{
  encStep3:"Як виглядатиме файл",
  encStep4:"Збережи обидва!", key1:"🔑 КЛЮЧ", key1n:"🔑 КЛЮЧ 1", key2:"🔑 КЛЮЧ 2",
  resDone:"Готово — збережи обидва!",
- resKey1:"② КЛЮЧ", resKey1n:"② КЛЮЧ 1", resKey2:"③ КЛЮЧ 2",
+ resKey1:"② КЛЮЧ", resKeyAll:"② КЛЮЧІ (ОБИДВА)",
  btnSave:"⬇️ Зберегти", btnShare:"📤 Поділитися", btnCopy:"📋 Копіювати",
  needOne:"🔑 Для цього файлу потрібен один ключ", needBoth:"🔐 Подвійне шифрування — потрібні ОБИДВА ключі",
  foundKeys:"вставлено ключів: {n}",
  copyKey:"📋 Копіювати ключ", copyKey1:"📋 Копіювати ключ 1", copyKey2:"📋 Копіювати ключ 2",
  shareKey:"📤 Поділитися ключем", shareKey1:"📤 Поділитися ключем 1", shareKey2:"📤 Поділитися ключем 2",
  copiedPaste:"✅ Скопійовано — встав у будь-який застосунок",
- copyBoth:"📋 Копіювати обидва ключі", copied:"✅ Скопійовано", copiedBoth:"✅ Обидва скопійовано",
+ copied:"✅ Скопійовано", btnCopyAll:"📋 Скопіювати все", copyKey1Only:"Ключ 1", copyKey2Only:"Ключ 2",
  picLabel:"🖼️ КАРТИНКА З ФАЙЛОМ", savePic:"⬇️ Зберегти картинку", sharePic:"📤 Поділитися картинкою",
  savedAttach:"✅ Збережено — прикріпи з теки Завантаження",
  saveRaw:"Зберегти без картинки",
@@ -500,14 +499,14 @@ en:{
  encStep3:"What the file looks like",
  encStep4:"Save both!", key1:"🔑 KEY", key1n:"🔑 KEY 1", key2:"🔑 KEY 2",
  resDone:"Done — save both!",
- resKey1:"② KEY", resKey1n:"② KEY 1", resKey2:"③ KEY 2",
+ resKey1:"② KEY", resKeyAll:"② KEYS (BOTH)",
  btnSave:"⬇️ Save", btnShare:"📤 Share", btnCopy:"📋 Copy",
  needOne:"🔑 This file needs one key", needBoth:"🔐 Double encryption — BOTH keys required",
  foundKeys:"keys pasted: {n}",
  copyKey:"📋 Copy key", copyKey1:"📋 Copy key 1", copyKey2:"📋 Copy key 2",
  shareKey:"📤 Share key", shareKey1:"📤 Share key 1", shareKey2:"📤 Share key 2",
  copiedPaste:"✅ Copied — paste it into any app",
- copyBoth:"📋 Copy both keys", copied:"✅ Copied", copiedBoth:"✅ Both copied",
+ copied:"✅ Copied", btnCopyAll:"📋 Copy all", copyKey1Only:"Key 1", copyKey2Only:"Key 2",
  picLabel:"🖼️ PICTURE WITH THE FILE", savePic:"⬇️ Save picture", sharePic:"📤 Share picture",
  savedAttach:"✅ Saved — attach it from your Downloads folder",
  saveRaw:"Save without picture",
@@ -1122,6 +1121,7 @@ async function readFromPixels(file){
 
 /* ==================== ІНТЕРФЕЙС ==================== */
 let encFile=null, encOut=null, decBytes=null, decOut=null, busy=false;
+let lastKeyA="", lastKeyB="";
 let selMin=0, level=1;
 
 function setBusy(v){
@@ -1203,10 +1203,10 @@ $("btnEncrypt").onclick=async()=>{
     encOut={png:blob,container,name: outName};
     $("resLabel").textContent=t("resDoc");
     $("resFileName").textContent="📎 "+encOut.name;
-    $("keyOut").value=keyTextA;
-    $("keyOut2").value=keyTextB||"";
-    $("lblKey1").textContent = t(keyTextB?"resKey1n":"resKey1");
-    $("key2Block").classList.toggle("hidden", !keyTextB);
+    lastKeyA=keyTextA; lastKeyB=keyTextB||"";
+    $("keyOut").value = keyTextB ? (keyTextA+"\n"+keyTextB) : keyTextA;
+    $("lblKey1").textContent = t(keyTextB?"resKeyAll":"resKey1");
+    $("keySeparateRow").classList.toggle("hidden", !keyTextB);
     $("expiryLine").textContent = expiry ? t("expUntil")+fmtDeadline(expiry) : t("expNone");
     $("shareAsFile").textContent=t("shareAsFile");
     $("encResult").classList.remove("hidden");
@@ -1255,25 +1255,18 @@ $("btnSharePng").onclick=()=>{
   shareFileOrSave(asFile,encOut.name,$("btnSharePng"));
 };
 $("btnShareOut").onclick=()=>{ if(decOut) shareFileOrSave(decOut.blob,decOut.name,$("btnShareOut")); };
-function copyText(t,btn,okText){
-  if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(t).catch(()=>{}); }
+function copyText(txt,btn,okText){
+  if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(txt).catch(()=>{}); }
   else { try{ document.execCommand("copy"); }catch{} }
   const old=btn.textContent; btn.textContent=okText;
-  setTimeout(()=>{ btn.textContent=old; },1800);
+  btn.classList.remove("copy-flash"); void btn.offsetWidth; btn.classList.add("copy-flash");
+  setTimeout(()=>{ btn.textContent=old; btn.classList.remove("copy-flash"); },1800);
 }
-$("btnCopyKey2").onclick=()=>{ $("keyOut2").select(); copyText($("keyOut2").value,$("btnCopyKey2"),t("copied")); };
-$("btnCopyBoth").onclick=()=>{
-  copyText("Ключ 1: "+$("keyOut").value+"\nКлюч 2: "+$("keyOut2").value, $("btnCopyBoth"), t("copiedBoth"));
-};
-$("btnShareKey2").onclick=()=>shareOrCopy($("keyOut2").value,"ParanoicCrypt — ключ 2",$("btnShareKey2"));
-$("btnCopyKey").onclick=()=>{
-  $("keyOut").select();
-  if(navigator.clipboard?.writeText){
-    navigator.clipboard.writeText($("keyOut").value).then(()=>msg("encStatus","🔑 Ключ скопійовано","ok")).catch(()=>{});
-  }else{
-    try{ document.execCommand("copy"); msg("encStatus","🔑 Ключ скопійовано","ok"); }catch{}
-  }
-};
+/* Один великий "Скопіювати все" — копіює вміст поля як є (один ключ або обидва
+   рядками). Маленькі кнопки поруч — для тих, кому треба саме один ключ окремо. */
+$("btnCopyAll").onclick=()=>{ $("keyOut").select(); copyText($("keyOut").value,$("btnCopyAll"),t("copied")); };
+$("btnCopyKey1").onclick=()=>copyText(lastKeyA,$("btnCopyKey1"),t("copied"));
+$("btnCopyKey2").onclick=()=>copyText(lastKeyB,$("btnCopyKey2"),t("copied"));
 $("btnDownloadPng").onclick=()=>{
   if(!encOut) return;
   download(encOut.png,encOut.name);
@@ -1638,7 +1631,7 @@ function refreshDynamicLang(){
   $("timerLabel").textContent = t($("useTimer").checked?"timerOn":"timerOff");
   if(!$("encFile").files.length){ $("encDropTitle").textContent=t("tapHere"); $("encDropSub").textContent=t("anyFile"); }
 
-  if($("keyOut").value) $("lblKey1").textContent=t($("keyOut2").value?"resKey1n":"resKey1");
+  if($("keyOut").value) $("lblKey1").textContent=t(lastKeyB?"resKeyAll":"resKey1");
   if(decBytes) updateKeyNeed();
 }
 $("btnLang").onclick=()=>{
